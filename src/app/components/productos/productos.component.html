@@ -1,0 +1,62 @@
+<!-- src/app/components/productos/productos.component.html -->
+<div class="container">
+  <div class="header">
+    <h1>📦 Gestión de Productos</h1>
+    <p class="last-update">
+      Última actualización: 
+      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
+      <span *ngIf="!lastUpdated">Cargando...</span>
+    </p>
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    <span>⏳ Cargando productos...</span>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Código</th>
+          <th>Nombre</th>
+          <th>Descripción</th>
+          <th>Precio (S/)</th>
+          <th>Stock</th>
+          <th>Estado</th>
+          <th>Fecha Registro</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let p of productos" class="producto-row">
+          <td>{{ p.idProducto }}</td>
+          <td><strong>{{ p.codigo }}</strong></td>
+          <td>{{ p.nombre }}</td>
+          <td>{{ p.descripcion || 'Sin descripción' }}</td>
+          <td class="precio">{{ p.precio | number:'1.2-2' }}</td>
+          <td class="stock" [class.stock-bajo]="p.stock < 10">{{ p.stock }}</td>
+          <td>
+            <span [class]="getEstadoClass(p.estado)">{{ p.estado }}</span>
+          </td>
+          <td class="fecha">{{ formatearFecha(p.fechaRegistro) }}</td>
+          <td class="acciones">
+            <button class="btn-eliminar" (click)="confirmarEliminar(p)">
+              🗑️ Eliminar
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="productos.length === 0 && !cargando">
+          <td colspan="9" class="no-data">
+            📭 No hay productos registrados
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>Total de productos: <strong>{{ productos.length }}</strong></p>
+  </div>
+</div>

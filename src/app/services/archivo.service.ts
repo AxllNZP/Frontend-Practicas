@@ -29,7 +29,6 @@ export class ArchivoService {
   }
 
   descargar(id: number): Observable<Blob> {
-    // El backend expone GET /{id} que devuelve bytes y tipo correcto.
     return this.http.get(`${this.apiUrl}/${id}`, { responseType: 'blob' });
   }
 

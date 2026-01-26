@@ -41,12 +41,4 @@ export class ProductoService {
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
-
-  buscarPorNombre(nombre: string): Observable<ProductoDto> {
-    return this.http.get<ProductoDto>(`${this.apiUrl}/nombre/${nombre}`);
-  }
-
-  buscarPorPrecioMenor(precio: number): Observable<ProductoDto[]> {
-    return this.http.get<ProductoDto[]>(`${this.apiUrl}/precio-menor/${precio}`);
-  }
 }

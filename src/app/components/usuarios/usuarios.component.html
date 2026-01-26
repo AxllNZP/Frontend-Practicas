@@ -1,0 +1,62 @@
+<!-- src/app/components/usuarios/usuarios.component.html -->
+<div class="container">
+  <div class="header">
+    <h1>👥 Gestión de Usuarios</h1>
+    <p class="last-update">
+      Última actualización: 
+      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
+      <span *ngIf="!lastUpdated">Cargando...</span>
+    </p>
+  </div>
+
+  <div *ngIf="cargando" class="loading">
+    <span>⏳ Cargando usuarios...</span>
+  </div>
+
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Usuario</th>
+          <th>Nombre Completo</th>
+          <th>Email</th>
+          <th>Rol</th>
+          <th>Estado</th>
+          <th>Fecha Registro</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let u of usuarios" class="usuario-row">
+          <td>{{ u.idUsuario }}</td>
+          <td><strong>{{ u.nombreUsuario }}</strong></td>
+          <td>{{ u.nombreCompleto }}</td>
+          <td class="email">{{ u.email || 'Sin email' }}</td>
+          <td>
+            <span [class]="getRolClass(u.rol)">{{ u.rol }}</span>
+          </td>
+          <td>
+            <span [class]="getEstadoClass(u.estado)">{{ u.estado }}</span>
+          </td>
+          <td class="fecha">{{ formatearFecha(u.fechaRegistro) }}</td>
+          <td class="acciones">
+            <button class="btn-eliminar" (click)="confirmarEliminar(u)">
+              🗑️ Eliminar
+            </button>
+          </td>
+        </tr>
+
+        <tr *ngIf="usuarios.length === 0 && !cargando">
+          <td colspan="8" class="no-data">
+            👤 No hay usuarios registrados en el sistema
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="footer">
+    <p>Total de usuarios: <strong>{{ usuarios.length }}</strong></p>
+  </div>
+</div>

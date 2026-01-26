@@ -1,18 +1,18 @@
-// src/app/components/productos/productos.component.ts
+// src/app/components/usuarios/usuarios.component.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ProductoService, ProductoDto } from '../../services/producto.service';
+import { UsuarioService, UsuarioDto } from '../../services/usuario.service';
 import { Subscription, interval } from 'rxjs';
 
 @Component({
-  selector: 'app-productos',
+  selector: 'app-usuarios',
   standalone: true,
   imports: [CommonModule],
-  templateUrl: './productos.component.html',
-  styleUrls: ['./productos.component.css']
+  templateUrl: './usuarios.component.html',
+  styleUrls: ['./usuarios.component.css']
 })
-export class ProductosComponent implements OnInit, OnDestroy {
-  productos: ProductoDto[] = [];
+export class UsuariosComponent implements OnInit, OnDestroy {
+  usuarios: UsuarioDto[] = [];
   lastUpdated: Date | null = null;
   cargando = false;
 
@@ -20,21 +20,16 @@ export class ProductosComponent implements OnInit, OnDestroy {
   private readonly POLL_MS = 5000;
 
   constructor(
-    private productoService: ProductoService,
-    private cdr: ChangeDetectorRef  // ← IMPORTANTE
+    private usuarioService: UsuarioService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
-    console.log('=== PRODUCTOS COMPONENT INICIADO ===');
-    console.log('API URL:', 'http://localhost:8080/api/productos');
+    console.log('=== USUARIOS COMPONENT INICIADO ===');
+    console.log('API URL:', 'http://localhost:8080/api/usuarios');
     
-    // Cargar productos inmediatamente
-    this.cargarProductos();
-    
-    // Iniciar polling automático
+    this.cargarUsuarios();
     this.startPolling();
-    
-    // Escuchar cambios de visibilidad
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
@@ -43,30 +38,30 @@ export class ProductosComponent implements OnInit, OnDestroy {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
-  private cargarProductos(): void {
-    console.log('=== CARGANDO PRODUCTOS ===');
+  private cargarUsuarios(): void {
+    console.log('=== CARGANDO USUARIOS ===');
     this.cargando = true;
 
-    this.productoService.listar().subscribe({
+    this.usuarioService.listar().subscribe({
       next: data => {
-        console.log('✓ PRODUCTOS RECIBIDOS:', data);
-        console.log('✓ Cantidad de productos:', data.length);
+        console.log('✓ USUARIOS RECIBIDOS:', data);
+        console.log('✓ Cantidad de usuarios:', data.length);
         
-        // ⭐ CREAR NUEVA REFERENCIA DEL ARRAY (MUY IMPORTANTE)
-        this.productos = [...data];
+        // Crear nueva referencia del array
+        this.usuarios = [...data];
         this.lastUpdated = new Date();
         this.cargando = false;
         
-        // ⭐ FORZAR DETECCIÓN DE CAMBIOS
+        // Forzar detección de cambios
         this.cdr.detectChanges();
-        console.log('✓ Vista actualizada con', this.productos.length, 'productos');
+        console.log('✓ Vista actualizada con', this.usuarios.length, 'usuarios');
       },
       error: err => {
-        console.error('✗ ERROR AL CARGAR PRODUCTOS:', err);
+        console.error('✗ ERROR AL CARGAR USUARIOS:', err);
         console.error('✗ Error status:', err.status);
         console.error('✗ Error message:', err.message);
         
-        this.productos = [];
+        this.usuarios = [];
         this.cargando = false;
         this.cdr.detectChanges();
         
@@ -80,8 +75,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
   /********** Polling automático **********/
   private startPolling(): void {
     this.pollingSub = interval(this.POLL_MS).subscribe(() => {
-      console.log('⟳ Polling - recargando productos...');
-      this.cargarProductos();
+      console.log('⟳ Polling - recargando usuarios...');
+      this.cargarUsuarios();
     });
   }
 
@@ -98,38 +93,37 @@ export class ProductosComponent implements OnInit, OnDestroy {
       this.stopPolling();
     } else {
       console.log('▶ Pestaña visible - reiniciando polling');
-      this.cargarProductos();
+      this.cargarUsuarios();
       this.startPolling();
     }
   }
   /******************************************/
 
-  confirmarEliminar(producto: ProductoDto): void {
+  confirmarEliminar(usuario: UsuarioDto): void {
     const ok = confirm(
-      `¿Eliminar producto?\n\n` +
-      `Código: ${producto.codigo}\n` +
-      `Nombre: ${producto.nombre}\n` +
-      `Precio: S/ ${producto.precio.toFixed(2)}`
+      `¿Eliminar usuario?\n\n` +
+      `Usuario: ${usuario.nombreUsuario}\n` +
+      `Nombre: ${usuario.nombreCompleto}\n` +
+      `Email: ${usuario.email}`
     );
     
     if (!ok) return;
 
-    console.log('Eliminando producto:', producto.nombre);
+    console.log('Eliminando usuario:', usuario.nombreUsuario);
 
-    this.productoService.eliminar(producto.idProducto).subscribe({
+    this.usuarioService.eliminar(usuario.idUsuario).subscribe({
       next: () => {
-        console.log('✓ Producto eliminado exitosamente');
-        alert(`Producto "${producto.nombre}" eliminado correctamente`);
-        this.cargarProductos(); // Recargar tabla inmediatamente
+        console.log('✓ Usuario eliminado exitosamente');
+        alert(`Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
+        this.cargarUsuarios();
       },
       error: err => {
-        console.error('✗ Error al eliminar producto:', err);
-        alert('Error al eliminar el producto. Intenta nuevamente.');
+        console.error('✗ Error al eliminar usuario:', err);
+        alert('Error al eliminar el usuario. Intenta nuevamente.');
       }
     });
   }
 
-  // Método auxiliar para formatear fecha
   formatearFecha(fecha: string): string {
     return new Date(fecha).toLocaleString('es-PE', {
       day: '2-digit',
@@ -140,8 +134,21 @@ export class ProductosComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Método para obtener clase CSS según estado
+  getRolClass(rol: string): string {
+    const classes: { [key: string]: string } = {
+      'ADMIN': 'rol-admin',
+      'USUARIO': 'rol-usuario',
+      'VENDEDOR': 'rol-vendedor'
+    };
+    return classes[rol] || 'rol-usuario';
+  }
+
   getEstadoClass(estado: string): string {
     return estado === 'ACTIVO' ? 'estado-activo' : 'estado-inactivo';
+  }
+
+  // Método para ocultar parte de la contraseña (seguridad)
+  ocultarClave(clave: string): string {
+    return '•'.repeat(clave.length);
   }
 }
