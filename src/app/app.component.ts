@@ -1,10 +1,9 @@
 // src/app/app.component.ts
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArchivoService, ArchivoDto } from './services/archivo.service';
 import { finalize } from 'rxjs/operators';
-import { Subscription, interval, of } from 'rxjs';
-import { startWith, switchMap, catchError } from 'rxjs/operators';
+import { Subscription, interval } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -13,21 +12,24 @@ import { startWith, switchMap, catchError } from 'rxjs/operators';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class App implements OnInit, OnDestroy {
+export class AppComponent implements OnInit, OnDestroy {
   archivoSeleccionado: File | null = null;
-  archivos: any[] = [];
+  archivos: ArchivoDto[] = [];
   uploading = false;
   lastUpdated: Date | null = null;
 
   private pollingSub?: Subscription;
-  private readonly POLL_MS = 5000; // cada 5 segundos
+  private readonly POLL_MS = 5000;
 
-  constructor(private archivoService: ArchivoService) {}
+  constructor(
+    private archivoService: ArchivoService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
+    console.log('=== NGONINIT EJECUTADO ===');
+    this.cargarArchivos();
     this.startPolling();
-    this.cargarLista();
-    // manejar visibilidad de la pestaña para pausar/reanudar
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
@@ -36,29 +38,30 @@ export class App implements OnInit, OnDestroy {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
-  /********** Polling automático **********/
-  private startPolling(): void {
-    if (this.pollingSub && !this.pollingSub.closed) return; // ya corre
-    this.pollingSub = interval(this.POLL_MS).pipe(
-      startWith(0), // ejecuta inmediatamente al subscribirse
-      switchMap(() =>
-        this.archivoService.listar().pipe(
-          catchError(err => {
-            console.error('Error listando archivos (polling):', err);
-            // no romper el stream; devolvemos lista vacía temporalmente
-            return of<ArchivoDto[]>([]);
-          })
-        )
-      )
-    ).subscribe({
+  private cargarArchivos(): void {
+    console.log('=== INICIANDO CARGA DE ARCHIVOS ===');
+    
+    this.archivoService.listar().subscribe({
       next: data => {
-        this.archivos = data;
+        console.log('✓ DATA RECIBIDA:', data);
+        console.log('✓ Cantidad de archivos:', data.length);
+        this.archivos = [...data]; // Crear nueva referencia del array
         this.lastUpdated = new Date();
+        this.cdr.detectChanges(); // FORZAR detección de cambios
+        console.log('✓ Vista actualizada');
       },
       error: err => {
-        // no debería llegar aquí porque catchError maneja errores internamente
-        console.error('Error en polling:', err);
+        console.error('✗ ERROR HTTP:', err);
+        this.archivos = [];
+        this.cdr.detectChanges();
       }
+    });
+  }
+
+  /********** Polling automático **********/
+  private startPolling(): void {
+    this.pollingSub = interval(this.POLL_MS).subscribe(() => {
+      this.cargarArchivos();
     });
   }
 
@@ -73,6 +76,7 @@ export class App implements OnInit, OnDestroy {
     if (document.hidden) {
       this.stopPolling();
     } else {
+      this.cargarArchivos();
       this.startPolling();
     }
   }
@@ -88,32 +92,20 @@ export class App implements OnInit, OnDestroy {
     this.uploading = true;
 
     this.archivoService.subir(this.archivoSeleccionado)
-      .pipe(finalize(() => { this.uploading = false; this.archivoSeleccionado = null; }))
+      .pipe(finalize(() => { 
+        this.uploading = false; 
+        this.archivoSeleccionado = null; 
+      }))
       .subscribe({
         next: res => {
           alert('Archivo subido correctamente');
-          // actualizar inmediatamente (además del polling)
-          this.cargarLista();
+          this.cargarArchivos();
         },
         error: err => {
           console.error(err);
           alert('Error al subir archivo. Revisa el backend/CORS.');
         }
       });
-  }
-
-  cargarLista(): void {
-    // llamada manual (usa el service directamente)
-    this.archivoService.listar().subscribe({
-      next: (data) => {
-        this.archivos = data;
-        this.lastUpdated = new Date();
-      },
-      error: err => {
-        console.error(err);
-        alert('Error al obtener lista de archivos');
-      }
-    });
   }
 
   download(a: ArchivoDto): void {
@@ -138,11 +130,11 @@ export class App implements OnInit, OnDestroy {
   confirmDelete(a: ArchivoDto): void {
     const ok = confirm(`¿Eliminar "${a.nombre}" (id=${a.id})?`);
     if (!ok) return;
+    
     this.archivoService.eliminar(a.id).subscribe({
       next: () => {
         alert('Archivo eliminado');
-        // actualizar inmediatamente
-        this.cargarLista();
+        this.cargarArchivos();
       },
       error: err => {
         console.error(err);

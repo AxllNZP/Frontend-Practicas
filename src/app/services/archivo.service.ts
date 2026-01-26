@@ -29,12 +29,11 @@ export class ArchivoService {
   }
 
   descargar(id: number): Observable<Blob> {
-    // El backend expone GET /{id}/descargar que devuelve bytes y tipo correcto.
+    // El backend expone GET /{id} que devuelve bytes y tipo correcto.
     return this.http.get(`${this.apiUrl}/${id}`, { responseType: 'blob' });
   }
 
   eliminar(id: number): Observable<any> {
-    // Requiere que implementes un DELETE en el backend (ver abajo). 
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
 }
