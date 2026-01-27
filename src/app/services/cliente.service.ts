@@ -11,7 +11,7 @@ export interface ClienteDto {
   direccion: string;
   telefono: string;
   email: string;
-  estado: 'ACTIVO' | 'INACTIVO';
+  estado: 'activo' | 'inactivo';
   fechaRegistro: string;
 }
 

@@ -97,7 +97,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
     this.modoEdicion = false;
     this.clienteSeleccionado = {
       tipoDocumento: 'DNI',
-      estado: 'ACTIVO'
+      estado: "activo"
     };
     this.mostrarModal = true;
   }
@@ -112,10 +112,9 @@ export class ClientesComponent implements OnInit, OnDestroy {
 
   // Cerrar modal
   cerrarModal(): void {
-    this.mostrarModal = false;
-    this.clienteSeleccionado = {};
-    this.startPolling();
-  }
+  this.mostrarModal = false;
+  this.clienteSeleccionado = {};
+}
   // Guardar cliente (crear o actualizar)
   guardarCliente(): void {
   if (!this.validarCliente()) {
@@ -214,6 +213,6 @@ private finalizarOperacion(): void {
 
   // Clase CSS según estado
   getEstadoClass(estado: string): string {
-    return estado === 'ACTIVO' ? 'estado-activo' : 'estado-inactivo';
+  return estado === 'activo' ? 'estado-activo' : 'estado-inactivo';
   }
 }

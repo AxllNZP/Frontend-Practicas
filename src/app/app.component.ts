@@ -2,6 +2,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ClientesComponent } from "./components/clientes/clientes.component";
 
 @Component({
   selector: 'app-root',
