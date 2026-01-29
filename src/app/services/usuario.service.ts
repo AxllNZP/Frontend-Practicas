@@ -1,16 +1,18 @@
-// src/app/services/usuario.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+
+export type RolUsuario = 'admin' | 'vendedor';
+export type EstadoGeneral = 'activo' | 'inactivo';
 
 export interface UsuarioDto {
   idUsuario: number;
   nombreUsuario: string;
   clave: string;
   nombreCompleto: string;
-  email: string;
-  rol: 'ADMIN' | 'USUARIO' | 'VENDEDOR';
-  estado: 'ACTIVO' | 'INACTIVO';
+  email?: string;
+  rol: RolUsuario;
+  estado: EstadoGeneral;
   fechaRegistro: string;
 }
 
@@ -18,9 +20,10 @@ export interface UsuarioDto {
   providedIn: 'root'
 })
 export class UsuarioService {
+
   private apiUrl = 'http://localhost:8080/api/usuarios';
 
-  constructor(private http: HttpClient) { }
+  constructor(private http: HttpClient) {}
 
   listar(): Observable<UsuarioDto[]> {
     return this.http.get<UsuarioDto[]>(this.apiUrl);
@@ -40,17 +43,5 @@ export class UsuarioService {
 
   eliminar(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
-  }
-
-  buscarPorEstado(estado: string): Observable<UsuarioDto[]> {
-    return this.http.get<UsuarioDto[]>(`${this.apiUrl}/estado/${estado}`);
-  }
-
-  buscarPorRol(rol: string): Observable<UsuarioDto[]> {
-    return this.http.get<UsuarioDto[]>(`${this.apiUrl}/rol/${rol}`);
-  }
-
-  buscarPorNombreUsuario(nombreUsuario: string): Observable<UsuarioDto> {
-    return this.http.get<UsuarioDto>(`${this.apiUrl}/username/${nombreUsuario}`);
   }
 }

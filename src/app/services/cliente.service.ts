@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
-export interface ClienteDto {
+export interface ClienteDto {//CLIENTE DTO, LO QUE MOSTRARIAS :D
   idCliente: number;
   tipoDocumento: string;
   numeroDocumento: string;

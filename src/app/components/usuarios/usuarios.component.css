@@ -1,50 +1,66 @@
 /* src/app/components/usuarios/usuarios.component.css */
 
 .container {
-  max-width: 1400px;
-  margin: 20px auto;
   padding: 20px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  max-width: 1400px;
+  margin: 0 auto;
 }
 
+/* ===== HEADER ===== */
 .header {
-  margin-bottom: 24px;
-  border-bottom: 3px solid #9b59b6;
-  padding-bottom: 16px;
+  margin-bottom: 25px;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
 }
 
 .header h1 {
-  margin: 0 0 8px 0;
+  font-size: 28px;
   color: #2c3e50;
-  font-size: 2rem;
+  margin: 0;
+}
+
+.btn-crear {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.3s;
+}
+
+.btn-crear:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
 }
 
 .last-update {
   color: #7f8c8d;
-  font-size: 0.9rem;
-  margin: 0;
+  font-size: 14px;
 }
 
-.last-update span {
-  font-weight: 600;
-  color: #9b59b6;
-}
-
+/* ===== LOADING ===== */
 .loading {
   text-align: center;
-  padding: 20px;
-  background: #f3e5f5;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  color: #7b1fa2;
-  font-weight: 500;
+  padding: 40px;
+  font-size: 18px;
+  color: #3498db;
 }
 
+/* ===== TABLA ===== */
 .table-container {
-  overflow-x: auto;
   background: white;
-  border-radius: 8px;
+  border-radius: 12px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  overflow-x: auto;
 }
 
 table {
@@ -53,99 +69,116 @@ table {
 }
 
 thead {
-  background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 100%);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
 }
 
 thead th {
-  padding: 14px 12px;
+  padding: 16px 12px;
   text-align: left;
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: 14px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 tbody tr {
   border-bottom: 1px solid #ecf0f1;
-  transition: background-color 0.2s ease;
+  transition: background 0.2s;
 }
 
 tbody tr:hover {
-  background-color: #f8f9fa;
+  background: #f8f9fa;
 }
 
 tbody td {
-  padding: 12px;
-  font-size: 0.95rem;
+  padding: 14px 12px;
+  font-size: 14px;
   color: #2c3e50;
 }
 
 .email {
-  color: #3498db;
-  font-size: 0.9rem;
+  color: #7f8c8d;
+  font-size: 13px;
 }
 
 .fecha {
-  font-size: 0.85rem;
   color: #7f8c8d;
+  font-size: 13px;
 }
 
-/* Roles */
+/* Estados de Rol */
 .rol-admin {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: #e74c3c;
+  color: white;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 600;
-  display: inline-block;
-}
-
-.rol-usuario {
-  background: #e3f2fd;
-  color: #1565c0;
-  padding: 4px 12px;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  display: inline-block;
+  text-transform: uppercase;
 }
 
 .rol-vendedor {
-  background: #fff3e0;
-  color: #ef6c00;
+  background: #3498db;
+  color: white;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 600;
-  display: inline-block;
+  text-transform: uppercase;
+}
+
+.rol-usuario {
+  background: #95a5a6;
+  color: white;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
 }
 
 /* Estados */
 .estado-activo {
-  background: #d5f4e6;
-  color: #27ae60;
+  background: #d4edda;
+  color: #155724;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 600;
-  display: inline-block;
+  text-transform: uppercase;
 }
 
 .estado-inactivo {
-  background: #fadbd8;
-  color: #e74c3c;
+  background: #f8d7da;
+  color: #721c24;
   padding: 4px 12px;
   border-radius: 12px;
-  font-size: 0.85rem;
+  font-size: 12px;
   font-weight: 600;
-  display: inline-block;
+  text-transform: uppercase;
 }
 
 /* Acciones */
 .acciones {
-  text-align: center;
+  display: flex;
+  gap: 8px;
+}
+
+.btn-editar {
+  background: #3498db;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-editar:hover {
+  background: #2980b9;
+  transform: translateY(-2px);
 }
 
 .btn-eliminar {
@@ -154,65 +187,193 @@ tbody td {
   border: none;
   padding: 8px 16px;
   border-radius: 6px;
+  font-size: 13px;
   cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
+  transition: all 0.3s;
 }
 
 .btn-eliminar:hover {
   background: #c0392b;
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
-}
-
-.btn-eliminar:active {
-  transform: translateY(0);
 }
 
 .no-data {
   text-align: center;
-  padding: 40px 20px;
+  padding: 60px 20px;
   color: #95a5a6;
-  font-size: 1.1rem;
-  font-style: italic;
+  font-size: 16px;
 }
 
+/* ===== FOOTER ===== */
 .footer {
   margin-top: 20px;
-  padding: 16px;
-  background: #ecf0f1;
-  border-radius: 8px;
   text-align: center;
-}
-
-.footer p {
-  margin: 0;
   color: #7f8c8d;
-  font-size: 0.95rem;
+  font-size: 14px;
 }
 
 .footer strong {
-  color: #9b59b6;
-  font-size: 1.1rem;
+  color: #2c3e50;
 }
 
-/* Responsive */
+/* ===== MODAL ===== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+  animation: modalSlideIn 0.3s ease-out;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.modal-header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 20px 24px;
+  border-radius: 16px 16px 0 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 20px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(90deg);
+}
+
+.modal-body {
+  padding: 24px;
+}
+
+/* ===== FORMULARIOS ===== */
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #34495e;
+  margin-bottom: 6px;
+}
+
+.form-control {
+  padding: 10px 12px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  transition: all 0.3s;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+/* ===== FOOTER MODAL ===== */
+.modal-footer {
+  padding: 16px 24px;
+  border-top: 1px solid #ecf0f1;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-cancelar {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-cancelar:hover {
+  background: #7f8c8d;
+}
+
+.btn-guardar {
+  background: #27ae60;
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn-guardar:hover {
+  background: #229954;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+}
+
+/* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
-  .container {
-    padding: 10px;
+  .form-grid {
+    grid-template-columns: 1fr;
   }
 
-  table {
-    font-size: 0.85rem;
-  }
-
-  thead th, tbody td {
-    padding: 8px 6px;
-  }
-
-  .btn-eliminar {
-    padding: 6px 10px;
-    font-size: 0.8rem;
+  .acciones {
+    flex-direction: column;
   }
 }

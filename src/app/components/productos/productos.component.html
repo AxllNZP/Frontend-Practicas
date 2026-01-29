@@ -1,17 +1,16 @@
-<!-- src/app/components/productos/productos.component.html -->
 <div class="container">
   <div class="header">
-    <h1>📦 Gestión de Productos</h1>
+    <div class="header-content">
+      <h1>📦 Gestión de Productos</h1>
+      <button class="btn-crear" (click)="abrirModalCrear()">➕ Nuevo Producto</button>
+    </div>
     <p class="last-update">
-      Última actualización: 
+      Última actualización:
       <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
-      <span *ngIf="!lastUpdated">Cargando...</span>
     </p>
   </div>
 
-  <div *ngIf="cargando" class="loading">
-    <span>⏳ Cargando productos...</span>
-  </div>
+  <div *ngIf="cargando" class="loading">⏳ Cargando productos...</div>
 
   <div class="table-container">
     <table>
@@ -21,42 +20,83 @@
           <th>Código</th>
           <th>Nombre</th>
           <th>Descripción</th>
-          <th>Precio (S/)</th>
+          <th>Precio</th>
           <th>Stock</th>
           <th>Estado</th>
-          <th>Fecha Registro</th>
+          <th>Fecha</th>
           <th>Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let p of productos" class="producto-row">
+        <tr *ngFor="let p of productos">
           <td>{{ p.idProducto }}</td>
           <td><strong>{{ p.codigo }}</strong></td>
           <td>{{ p.nombre }}</td>
-          <td>{{ p.descripcion || 'Sin descripción' }}</td>
-          <td class="precio">{{ p.precio | number:'1.2-2' }}</td>
-          <td class="stock" [class.stock-bajo]="p.stock < 10">{{ p.stock }}</td>
-          <td>
-            <span [class]="getEstadoClass(p.estado)">{{ p.estado }}</span>
-          </td>
-          <td class="fecha">{{ formatearFecha(p.fechaRegistro) }}</td>
+          <td>{{ p.descripcion || '—' }}</td>
+          <td>S/ {{ p.precio | number:'1.2-2' }}</td>
+          <td><span [class]="getStockClass(p.stock)">{{ p.stock }}</span></td>
+          <td><span [class]="getEstadoClass(p.estado)">{{ p.estado }}</span></td>
+          <td>{{ formatearFecha(p.fechaRegistro) }}</td>
           <td class="acciones">
-            <button class="btn-eliminar" (click)="confirmarEliminar(p)">
-              🗑️ Eliminar
-            </button>
-          </td>
-        </tr>
-
-        <tr *ngIf="productos.length === 0 && !cargando">
-          <td colspan="9" class="no-data">
-            📭 No hay productos registrados
+            <button class="btn-editar" (click)="abrirModalEditar(p)">✏️</button>
+            <button class="btn-eliminar" (click)="confirmarEliminar(p)">🗑️</button>
           </td>
         </tr>
       </tbody>
     </table>
   </div>
+</div>
 
-  <div class="footer">
-    <p>Total de productos: <strong>{{ productos.length }}</strong></p>
+<!-- MODAL -->
+<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>{{ modoEdicion ? '✏️ Editar Producto' : '➕ Nuevo Producto' }}</h2>
+      <button class="btn-close" (click)="cerrarModal()">✖</button>
+    </div>
+
+    <div class="modal-body">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Código *</label>
+          <input class="form-control" [(ngModel)]="productoSeleccionado.codigo">
+        </div>
+
+        <div class="form-group">
+          <label>Nombre *</label>
+          <input class="form-control" [(ngModel)]="productoSeleccionado.nombre">
+        </div>
+
+        <div class="form-group full-width">
+          <label>Descripción</label>
+          <input class="form-control" [(ngModel)]="productoSeleccionado.descripcion">
+        </div>
+
+        <div class="form-group">
+          <label>Precio *</label>
+          <input type="number" class="form-control" [(ngModel)]="productoSeleccionado.precio">
+        </div>
+
+        <div class="form-group">
+          <label>Stock *</label>
+          <input type="number" class="form-control" [(ngModel)]="productoSeleccionado.stock">
+        </div>
+
+        <div class="form-group">
+          <label>Estado *</label>
+          <select class="form-control" [(ngModel)]="productoSeleccionado.estado">
+            <option value="activo">Activo</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarProducto()">
+        {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
+      </button>
+    </div>
   </div>
 </div>
