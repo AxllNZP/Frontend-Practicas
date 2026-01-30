@@ -1,0 +1,31 @@
+/* styles.css */
+
+/* RESET BÁSICO */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f4f6f9;
+  color: #2c3e50;
+}
+
+/* Scroll bonito */
+body {
+  overflow-x: hidden;
+}
+
+/* Evita problemas con modales */
+body.modal-open {
+  overflow: hidden;
+}
+
+/* Enlaces */
+a {
+  text-decoration: none;
+}
+
+/* Botones consistentes */
+button {
+  font-family: inherit;
+}

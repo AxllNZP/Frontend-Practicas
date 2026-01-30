@@ -1,5 +1,5 @@
 // ===================================
-// SERVICIO DE AUTENTICACIÓN
+// SERVICIO DE AUTENTICACIÓN - VERSIÓN CORREGIDA
 // Ubicación: src/app/services/auth.service.ts
 // ===================================
 
@@ -8,81 +8,62 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap } from 'rxjs';
 import { AuthRequest, AuthResponse, RegisterRequest, Usuario, RolUsuario } from '../models/auth.models';
 
-/**
- * AuthService - Servicio centralizado para manejar autenticación
- * 
- * IMPORTANTE: Este servicio usa @Injectable({ providedIn: 'root' })
- * que lo hace disponible globalmente en toda la aplicación standalone
- */
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   
-  // Inyección de dependencias moderna (Angular 14+)
   private http = inject(HttpClient);
-  
-  // URL base de tu backend - AJUSTA SEGÚN TU CONFIGURACIÓN
   private readonly API_URL = 'http://localhost:8080/api/auth';
   
-  // BehaviorSubject para mantener el estado del usuario logueado
   private currentUserSubject = new BehaviorSubject<Usuario | null>(this.getUserFromToken());
-  
-  // Observable público para que los componentes se suscriban
   public currentUser$ = this.currentUserSubject.asObservable();
 
   constructor() {
-    console.log('AuthService inicializado');
+    console.log('🔐 AuthService inicializado');
+    const user = this.getUserFromToken();
+    if (user) {
+      console.log('✅ Usuario encontrado en token:', user);
+      console.log('👤 Rol del usuario:', user.rol);
+    }
   }
 
-  // ===================================
-  // MÉTODOS PRINCIPALES DE AUTENTICACIÓN
-  // ===================================
-
-  /**
-   * LOGIN - Autentica al usuario con el backend
-   */
   login(credentials: AuthRequest): Observable<AuthResponse> {
-    console.log('Intentando login con usuario:', credentials.nombreUsuario);
+    console.log('🔑 Intentando login:', credentials.nombreUsuario);
     
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
-          console.log('Login exitoso, guardando token');
+          console.log('✅ Login exitoso, token recibido');
           this.saveToken(response.token);
-          this.currentUserSubject.next(this.getUserFromToken());
+          
+          const user = this.getUserFromToken();
+          console.log('👤 Usuario decodificado:', user);
+          console.log('🎭 Rol asignado:', user?.rol);
+          
+          this.currentUserSubject.next(user);
         })
       );
   }
 
-  /**
-   * REGISTER - Registra un nuevo usuario
-   */
   register(userData: RegisterRequest): Observable<AuthResponse> {
-    console.log('Registrando nuevo usuario:', userData.nombreUsuario);
+    console.log('📝 Registrando usuario:', userData.nombreUsuario);
     
     return this.http.post<AuthResponse>(`${this.API_URL}/register`, userData)
       .pipe(
         tap(response => {
-          console.log('Registro exitoso, guardando token');
+          console.log('✅ Registro exitoso');
           this.saveToken(response.token);
           this.currentUserSubject.next(this.getUserFromToken());
         })
       );
   }
 
-  /**
-   * LOGOUT - Cierra la sesión del usuario
-   */
   logout(): void {
-    console.log('Cerrando sesión');
+    console.log('👋 Cerrando sesión');
     localStorage.removeItem('token');
     this.currentUserSubject.next(null);
   }
-
-  // ===================================
-  // GESTIÓN DEL TOKEN JWT
-  // ===================================
 
   private saveToken(token: string): void {
     localStorage.setItem('token', token);
@@ -102,29 +83,34 @@ export class AuthService {
     return this.currentUserSubject.value;
   }
 
-  // ===================================
-  // DECODIFICACIÓN DEL TOKEN JWT
-  // ===================================
-
   private getUserFromToken(): Usuario | null {
     const token = this.getToken();
     if (!token) return null;
 
-    
     try {
       const payload = this.decodeToken(token);
-      console.log('JWT PAYLOAD COMPLETO 👉', payload); // 👈 AÑADE ESTO
+      console.log('🔍 JWT PAYLOAD COMPLETO:', payload);
       
-      const rolesEnPayload = payload.rol || payload.role || (payload.authorities && payload.authorities[0]);
+      // 🔥 LEER EL ROL DEL TOKEN
+      const rolDelToken = payload.rol || payload.role;
       
-      return {
+      if (!rolDelToken) {
+        console.error('❌ ERROR: No se encontró el rol en el token');
+        return null;
+      }
+
+      const usuario: Usuario = {
         nombreUsuario: payload.sub,
         nombreCompleto: payload.nombreCompleto || '',
         email: payload.email || '',
-        rol: rolesEnPayload ? rolesEnPayload.toLowerCase() : RolUsuario.VENDEDOR
+        rol: rolDelToken.toLowerCase() as RolUsuario
       };
+
+      console.log('✅ Usuario extraído del token:', usuario);
+      return usuario;
+
     } catch (error) {
-      console.error('Error decodificando token:', error);
+      console.error('❌ Error decodificando token:', error);
       return null;
     }
   }
@@ -159,17 +145,19 @@ export class AuthService {
     }
   }
 
-  /**
-   * Verifica si el usuario actual tiene un rol específico
-   */
   hasRole(rol: RolUsuario): boolean {
     const user = this.getCurrentUser();
-    return user?.rol === rol;
+    const hasRole = user?.rol === rol;
+    
+    console.log(`🔍 Verificando rol "${rol}":`, {
+      usuarioActual: user?.nombreUsuario,
+      rolActual: user?.rol,
+      tieneRol: hasRole
+    });
+    
+    return hasRole;
   }
 
-  /**
-   * Verifica si el usuario actual es administrador
-   */
   isAdmin(): boolean {
     return this.hasRole(RolUsuario.ADMIN);
   }

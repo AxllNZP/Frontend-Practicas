@@ -1,10 +1,5 @@
-// ===================================
-// CONFIGURACIÓN DE RUTAS
-// Ubicación: src/app/app.routes.ts
-// ===================================
-
 import { Routes } from '@angular/router';
-import { authGuard } from './guards/auth.guard';
+import { authGuard, adminGuard } from './guards/auth.guard';
 
 import { ClientesComponent } from './components/clientes/clientes.component';
 import { ProductosComponent } from './components/productos/productos.component';
@@ -38,32 +33,46 @@ export const routes: Routes = [
         .then(m => m.DashboardComponent),
     canActivate: [authGuard],
     children: [
-      // Redirigir a facturas cuando entren a /dashboard
+      
       { 
         path: '', 
         redirectTo: 'facturas', 
         pathMatch: 'full' 
       },
-      // Rutas hijas que se mostrarán dentro del dashboard
+
+      // ✅ FACTURAS: Todos los usuarios autenticados
       { 
         path: 'facturas', 
-        component: FacturasComponent 
+        component: FacturasComponent,
+        canActivate: [authGuard]
       },
+
+      // ✅ CLIENTES: Todos los usuarios autenticados
       { 
         path: 'clientes', 
-        component: ClientesComponent 
+        component: ClientesComponent,
+        canActivate: [authGuard]
       },
+
+      // ✅ PRODUCTOS: Todos los usuarios autenticados
       { 
         path: 'productos', 
-        component: ProductosComponent 
+        component: ProductosComponent,
+        canActivate: [authGuard]
       },
+
+      // 🔒 USUARIOS: SOLO ADMIN
       { 
         path: 'usuarios', 
-        component: UsuariosComponent 
+        component: UsuariosComponent,
+        canActivate: [authGuard, adminGuard]
       },
+
+      // 🔒 MONEDAS: SOLO ADMIN
       { 
         path: 'monedas', 
-        component: MonedasComponent 
+        component: MonedasComponent,
+        canActivate: [authGuard, adminGuard]
       }
     ]
   },
@@ -79,18 +88,3 @@ export const routes: Routes = [
     redirectTo: 'login' 
   }
 ];
-
-/**
- * CÓMO FUNCIONAN LAS RUTAS:
- * 
- * 1. / → Redirige a /login
- * 2. /login → Muestra LoginComponent
- * 3. /register → Muestra RegisterComponent
- * 4. /dashboard → Redirige a /dashboard/facturas
- * 5. /dashboard/facturas → Muestra DashboardComponent con FacturasComponent dentro
- * 6. /dashboard/clientes → Muestra DashboardComponent con ClientesComponent dentro
- * 7. etc...
- * 
- * El DashboardComponent actúa como LAYOUT y usa <router-outlet>
- * para mostrar los componentes hijos (facturas, clientes, etc.)
- */

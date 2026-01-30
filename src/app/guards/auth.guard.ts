@@ -1,17 +1,10 @@
-// ===================================
-// GUARD DE AUTENTICACIÓN
-// Ubicación: src/app/guards/auth.guard.ts
-// ===================================
-
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { RolUsuario } from '../models/auth.models';
 
 /**
- * authGuard - Guard funcional para proteger rutas
- * 
- * NOTA: En Angular standalone (14+) los guards son FUNCIONES, no clases
- * Este guard verifica si el usuario está autenticado antes de permitir acceso
+ * authGuard - Verifica si el usuario está autenticado
  */
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -23,33 +16,58 @@ export const authGuard: CanActivateFn = (route, state) => {
   }
 
   console.log('❌ Usuario no autenticado, redirigiendo a login desde:', state.url);
-  
-  // Guardar la URL a la que intentaba acceder
   localStorage.setItem('redirectUrl', state.url);
   
-  // Redirigir al login
   return router.createUrlTree(['/login']);
 };
 
 /**
- * adminGuard - Guard funcional para rutas de administrador
- * 
- * Verifica que el usuario esté autenticado Y tenga rol de admin
+ * adminGuard - Verifica que el usuario sea ADMIN
  */
 export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
+
+  console.log('🔐 Verificando acceso de admin a:', state.url);
 
   if (!authService.isAuthenticated()) {
     console.log('❌ No autenticado, redirigiendo a login');
     return router.createUrlTree(['/login']);
   }
 
+  const user = authService.getCurrentUser();
+  console.log('👤 Usuario actual:', user);
+  console.log('🎭 Rol del usuario:', user?.rol);
+
   if (authService.isAdmin()) {
-    console.log('✅ Usuario es admin, acceso permitido');
+    console.log('✅ Usuario es ADMIN, acceso permitido');
     return true;
   }
 
-  console.log('❌ Usuario no es admin, acceso denegado');
-  return router.createUrlTree(['/dashboard']); // O una página de acceso denegado
+  console.log('❌ Usuario NO es ADMIN (rol:', user?.rol, '), acceso denegado');
+  alert('⛔ Acceso denegado. Solo los administradores pueden acceder a esta sección.');
+  
+  return router.createUrlTree(['/dashboard/facturas']);
+};
+
+/**
+ * vendedorGuard - Verifica que el usuario sea VENDEDOR o ADMIN
+ */
+export const vendedorGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  if (!authService.isAuthenticated()) {
+    return router.createUrlTree(['/login']);
+  }
+
+  const user = authService.getCurrentUser();
+  
+  if (user?.rol === RolUsuario.VENDEDOR || user?.rol === RolUsuario.ADMIN) {
+    console.log('✅ Usuario autorizado (vendedor o admin)');
+    return true;
+  }
+
+  console.log('❌ Usuario no autorizado');
+  return router.createUrlTree(['/dashboard']);
 };

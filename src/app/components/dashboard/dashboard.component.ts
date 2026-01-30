@@ -1,29 +1,18 @@
-// ===================================
-// COMPONENTE DASHBOARD (STANDALONE)
-// Ubicación: src/app/components/dashboard/dashboard.component.ts
-// ===================================
-
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
-import { Usuario } from '../../models/auth.models';
+import { Usuario, RolUsuario } from '../../models/auth.models';
 
-/**
- * DashboardComponent - Componente principal protegido (LAYOUT)
- * 
- * Este componente actúa como layout principal y muestra
- * los componentes hijos a través del router-outlet
- */
 @Component({
   selector: 'app-dashboard',
   standalone: true,
   imports: [
     CommonModule,
-    RouterOutlet,      // Para mostrar rutas hijas
-    RouterLink,        // Para los enlaces de navegación
-    RouterLinkActive   // Para marcar el enlace activo
+    RouterOutlet,
+    RouterLink,
+    RouterLinkActive
   ],
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.css']
@@ -33,20 +22,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
   currentUser: Usuario | null = null;
   private userSubscription?: Subscription;
 
+  // 🔥 Exponer RolUsuario al template
+  readonly RolUsuario = RolUsuario;
+
   constructor(
     private authService: AuthService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
+    console.log('🏠 Dashboard inicializado');
 
     this.userSubscription = this.authService.currentUser$.subscribe(user => {
-    this.currentUser = user;
+      this.currentUser = user;
 
-    console.log('Usuario actual:', user);
-    console.log('Rol actual:', user?.rol);
-    console.log('Es admin?:', this.isAdmin());
-  });
+      console.log('👤 Usuario actual:', user);
+      console.log('🎭 Rol actual:', user?.rol);
+      console.log('👑 Es admin?:', this.isAdmin());
+      console.log('💼 Es vendedor?:', this.isVendedor());
+    });
   }
 
   ngOnDestroy(): void {
@@ -64,6 +58,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   isAdmin(): boolean {
     return this.authService.isAdmin();
+  }
+
+  isVendedor(): boolean {
+    return this.authService.hasRole(RolUsuario.VENDEDOR);
   }
 
   getInitials(): string {
