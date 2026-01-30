@@ -1,0 +1,111 @@
+<!-- 
+  TEMPLATE DEL COMPONENTE LOGIN
+  
+  Estructura:
+  - Contenedor centrado con tarjeta
+  - Formulario reactivo con validaciones
+  - Mensajes de error dinámicos
+  - Botón de submit con estado de carga
+-->
+
+<div class="login-container">
+  <div class="login-card">
+    
+    <!-- HEADER -->
+    <div class="login-header">
+      <h2>Iniciar Sesión</h2>
+      <p>Ingresa tus credenciales para continuar</p>
+    </div>
+
+    <!-- MENSAJE DE ERROR GLOBAL -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- FORMULARIO -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      
+      <!-- CAMPO: NOMBRE DE USUARIO -->
+      <div class="form-group">
+        <label for="nombreUsuario">
+          Usuario
+          <span class="required">*</span>
+        </label>
+        
+        <input
+          type="text"
+          id="nombreUsuario"
+          formControlName="nombreUsuario"
+          class="form-control"
+          [class.is-invalid]="submitted && f['nombreUsuario'].errors"
+          placeholder="Ingresa tu nombre de usuario"
+          autocomplete="username"
+        />
+        
+        <!-- ERRORES DE VALIDACIÓN -->
+        <div *ngIf="submitted && f['nombreUsuario'].errors" class="invalid-feedback">
+          <div *ngIf="f['nombreUsuario'].errors['required']">
+            El nombre de usuario es requerido
+          </div>
+          <div *ngIf="f['nombreUsuario'].errors['minlength']">
+            Debe tener al menos 3 caracteres
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPO: CONTRASEÑA -->
+      <div class="form-group">
+        <label for="clave">
+          Contraseña
+          <span class="required">*</span>
+        </label>
+        
+        <input
+          type="password"
+          id="clave"
+          formControlName="clave"
+          class="form-control"
+          [class.is-invalid]="submitted && f['clave'].errors"
+          placeholder="Ingresa tu contraseña"
+          autocomplete="current-password"
+        />
+        
+        <!-- ERRORES DE VALIDACIÓN -->
+        <div *ngIf="submitted && f['clave'].errors" class="invalid-feedback">
+          <div *ngIf="f['clave'].errors['required']">
+            La contraseña es requerida
+          </div>
+          <div *ngIf="f['clave'].errors['minlength']">
+            Debe tener al menos 4-20 caracteres
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTÓN SUBMIT -->
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block"
+        [disabled]="loading"
+      >
+        <!-- Mostrar spinner si está cargando -->
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Iniciando sesión...' : 'Iniciar Sesión' }}
+      </button>
+
+    </form>
+
+    <!-- FOOTER: LINK A REGISTRO -->
+    <div class="login-footer">
+      <p>
+        ¿No tienes una cuenta? 
+        <a (click)="goToRegister()" class="link">Regístrate aquí</a>
+      </p>
+    </div>
+
+  </div>
+</div>

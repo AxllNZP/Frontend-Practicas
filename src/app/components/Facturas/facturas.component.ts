@@ -7,6 +7,7 @@ import { ClienteService, ClienteDto } from '../../services/cliente.service';
 import { Subscription, interval } from 'rxjs';
 import { UsuarioService, UsuarioDto } from '../../services/usuario.service';
 import { ProductoService, ProductoDto } from '../../services/producto.service';
+import { MonedaService, MonedaDto } from '../../services/moneda.service';
 
 @Component({
   selector: 'app-facturas',
@@ -22,6 +23,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
   cargando = false;
   usuarios: UsuarioDto[] = [];
   productos: ProductoDto[] = [];
+  monedas: MonedaDto[] = [];
 
   // Para el modal de crear
   mostrarModal = false;
@@ -31,7 +33,8 @@ export class FacturasComponent implements OnInit, OnDestroy {
   observaciones: string = '';
   idCliente: number = 0;
   idUsuario: number = 1; // Usuario por defecto
-  idMoneda: number = 1;  // Moneda por defecto (PEN)
+  idMoneda: number = 1;
+    // Moneda por defecto (PEN)
 
   // Listas dinámicas
   detalles: DetalleFacturaDTO[] = [];
@@ -45,6 +48,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
     private clienteService: ClienteService,
     private usuarioService: UsuarioService,
     private productoService: ProductoService,
+    private monedaService: MonedaService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -54,6 +58,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
     this.cargarClientes();
     this.cargarUsuarios();
     this.cargarProductos();
+    this.cargarMonedas();
     this.startPolling();
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
@@ -63,6 +68,21 @@ export class FacturasComponent implements OnInit, OnDestroy {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
+
+  private cargarMonedas(): void {
+    this.monedaService.listar().subscribe({
+      next: data => {
+        this.monedas = data;
+        console.log('✓ Monedas cargadas:', this.monedas);
+        
+        // Opcional: establecer la primera moneda como predeterminada si existe
+        if (this.monedas.length > 0 && !this.idMoneda) {
+          this.idMoneda = this.monedas[0].idMoneda;
+        }
+      },
+      error: err => console.error('Error al cargar monedas:', err)
+    });
+  }
 
   private cargarProductos(): void {
   this.productoService.listar().subscribe({

@@ -7,7 +7,7 @@ import { ClientesComponent } from "./components/clientes/clientes.component";
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })

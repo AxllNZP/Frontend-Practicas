@@ -1,0 +1,42 @@
+<!-- TEMPLATE DEL DASHBOARD -->
+
+<div class="dashboard-container">
+
+  <!-- BARRA DE NAVEGACIÓN -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <h1>PROGRAMA Z</h1>
+    </div>
+    
+    <div class="navbar-menu">
+      <!-- MENÚ DE NAVEGACIÓN -->
+      <div class="navbar-links">
+        <a routerLink="/dashboard/facturas" routerLinkActive="active">Facturas</a>
+        <a routerLink="/dashboard/clientes" routerLinkActive="active">Clientes</a>
+        <a routerLink="/dashboard/productos" routerLinkActive="active">Productos</a>
+        <a routerLink="/dashboard/usuarios" routerLinkActive="active">Usuarios</a>
+        <a routerLink="/dashboard/monedas" routerLinkActive="active">Monedas</a>
+      </div>
+
+      <!-- MENÚ DE USUARIO -->
+      <div class="user-menu" *ngIf="currentUser">        
+        <!-- BOTONES DE ACCIÓN -->
+        <div class="user-actions">
+          <button class="btn btn-secondary btn-sm" (click)="goToProfile()">
+            Perfil
+          </button>
+          <button class="btn btn-danger btn-sm" (click)="logout()">
+            Salir
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENIDO PRINCIPAL - AQUÍ SE CARGAN LOS COMPONENTES -->
+  <main class="main-content">
+    <!-- Router Outlet para mostrar las rutas hijas -->
+    <router-outlet></router-outlet>
+  </main>
+
+</div>

@@ -1,0 +1,206 @@
+<!-- TEMPLATE DEL COMPONENTE REGISTER -->
+
+<div class="register-container">
+  <div class="register-card">
+    
+    <!-- HEADER -->
+    <div class="register-header">
+      <h2>Crear Cuenta</h2>
+      <p>Completa todos los campos para registrarte</p>
+    </div>
+
+    <!-- MENSAJE DE ÉXITO -->
+    <div *ngIf="successMessage" class="alert alert-success">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+        <polyline points="22 4 12 14.01 9 11.01"></polyline>
+      </svg>
+      {{ successMessage }}
+    </div>
+
+    <!-- MENSAJE DE ERROR -->
+    <div *ngIf="errorMessage" class="alert alert-error">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+      {{ errorMessage }}
+    </div>
+
+    <!-- FORMULARIO -->
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      
+      <!-- CAMPO: NOMBRE DE USUARIO -->
+      <div class="form-group">
+        <label for="nombreUsuario">
+          Nombre de Usuario
+          <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="nombreUsuario"
+          formControlName="nombreUsuario"
+          class="form-control"
+          [class.is-invalid]="submitted && f['nombreUsuario'].errors"
+          placeholder="Ej: juan_perez"
+          autocomplete="username"
+        />
+        <div *ngIf="submitted && f['nombreUsuario'].errors" class="invalid-feedback">
+          <div *ngIf="f['nombreUsuario'].errors['required']">
+            El nombre de usuario es requerido
+          </div>
+          <div *ngIf="f['nombreUsuario'].errors['minlength']">
+            Debe tener al menos 3 caracteres
+          </div>
+          <div *ngIf="f['nombreUsuario'].errors['pattern']">
+            Solo se permiten letras, números y guión bajo
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPO: NOMBRE COMPLETO -->
+      <div class="form-group">
+        <label for="nombreCompleto">
+          Nombre Completo
+          <span class="required">*</span>
+        </label>
+        <input
+          type="text"
+          id="nombreCompleto"
+          formControlName="nombreCompleto"
+          class="form-control"
+          [class.is-invalid]="submitted && f['nombreCompleto'].errors"
+          placeholder="Ej: Juan Pérez García"
+        />
+        <div *ngIf="submitted && f['nombreCompleto'].errors" class="invalid-feedback">
+          <div *ngIf="f['nombreCompleto'].errors['required']">
+            El nombre completo es requerido
+          </div>
+          <div *ngIf="f['nombreCompleto'].errors['minlength']">
+            Debe tener al menos 3 caracteres
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPO: EMAIL -->
+      <div class="form-group">
+        <label for="email">
+          Email
+          <span class="required">*</span>
+        </label>
+        <input
+          type="email"
+          id="email"
+          formControlName="email"
+          class="form-control"
+          [class.is-invalid]="submitted && f['email'].errors"
+          placeholder="Ej: juan@ejemplo.com"
+          autocomplete="email"
+        />
+        <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+          <div *ngIf="f['email'].errors['required']">
+            El email es requerido
+          </div>
+          <div *ngIf="f['email'].errors['email']">
+            Debe ser un email válido
+          </div>
+        </div>
+      </div>
+
+      <!-- GRID DE 2 COLUMNAS PARA CONTRASEÑAS -->
+      <div class="form-row">
+        <!-- CAMPO: CONTRASEÑA -->
+        <div class="form-group">
+          <label for="clave">
+            Contraseña
+            <span class="required">*</span>
+          </label>
+          <input
+            type="password"
+            id="clave"
+            formControlName="clave"
+            class="form-control"
+            [class.is-invalid]="submitted && f['clave'].errors"
+            placeholder="Mínimo 6 caracteres"
+            autocomplete="new-password"
+          />
+          <div *ngIf="submitted && f['clave'].errors" class="invalid-feedback">
+            <div *ngIf="f['clave'].errors['required']">
+              La contraseña es requerida
+            </div>
+            <div *ngIf="f['clave'].errors['minlength']">
+              Debe tener al menos 6 caracteres
+            </div>
+          </div>
+        </div>
+
+        <!-- CAMPO: CONFIRMAR CONTRASEÑA -->
+        <div class="form-group">
+          <label for="confirmarClave">
+            Confirmar Contraseña
+            <span class="required">*</span>
+          </label>
+          <input
+            type="password"
+            id="confirmarClave"
+            formControlName="confirmarClave"
+            class="form-control"
+            [class.is-invalid]="submitted && f['confirmarClave'].errors"
+            placeholder="Repite la contraseña"
+            autocomplete="new-password"
+          />
+          <div *ngIf="submitted && f['confirmarClave'].errors" class="invalid-feedback">
+            <div *ngIf="f['confirmarClave'].errors['required']">
+              Debes confirmar la contraseña
+            </div>
+            <div *ngIf="f['confirmarClave'].errors['passwordMismatch']">
+              Las contraseñas no coinciden
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CAMPO: ROL -->
+      <div class="form-group">
+        <label for="rol">
+          Rol
+          <span class="required">*</span>
+        </label>
+        <select
+          id="rol"
+          formControlName="rol"
+          class="form-control"
+          [class.is-invalid]="submitted && f['rol'].errors"
+        >
+          <option *ngFor="let rol of roles" [value]="rol.value">
+            {{ rol.label }}
+          </option>
+        </select>
+        <div class="form-hint">
+          Selecciona el rol que tendrás en el sistema
+        </div>
+      </div>
+
+      <!-- BOTÓN SUBMIT -->
+      <button 
+        type="submit" 
+        class="btn btn-primary btn-block"
+        [disabled]="loading"
+      >
+        <span *ngIf="loading" class="spinner"></span>
+        {{ loading ? 'Registrando...' : 'Crear Cuenta' }}
+      </button>
+
+    </form>
+
+    <!-- FOOTER: LINK A LOGIN -->
+    <div class="register-footer">
+      <p>
+        ¿Ya tienes una cuenta? 
+        <a (click)="goToLogin()" class="link">Inicia sesión aquí</a>
+      </p>
+    </div>
+
+  </div>
+</div>
