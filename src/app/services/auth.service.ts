@@ -1,10 +1,10 @@
 // ===================================
-// ARCHIVO CORREGIDO: auth.service.ts
+// SERVICIO DE AUTENTICACIÓN CORREGIDO
 // Ubicación: src/app/services/auth.service.ts
 // ===================================
 
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { AuthRequest, AuthResponse, RegisterRequest, Usuario, RolUsuario } from '../models/auth.models';
 
@@ -14,6 +14,8 @@ import { AuthRequest, AuthResponse, RegisterRequest, Usuario, RolUsuario } from 
 export class AuthService {
   
   private http = inject(HttpClient);
+  
+  // ✅ URL CORREGIDA - Asegúrate que tu backend esté en este puerto
   private readonly API_URL = 'http://localhost:8080/api/auth';
   
   private currentUserSubject = new BehaviorSubject<Usuario | null>(this.getUserFromToken());
@@ -21,6 +23,7 @@ export class AuthService {
 
   constructor() {
     console.log('🔐 AuthService inicializado');
+    console.log('📍 API URL:', this.API_URL);
     const user = this.getUserFromToken();
     if (user) {
       console.log('✅ Usuario encontrado en token:', {
@@ -29,28 +32,37 @@ export class AuthService {
         email: user.email
       });
     } else {
-      console.log('ℹ️ No hay usuario en token (primera vez o sesión expirada)');
+      console.log('ℹ️ No hay usuario en token');
     }
   }
 
   /**
-   * ✅ CORRECCIÓN: Mejor manejo de errores en login
+   * ✅ LOGIN CORREGIDO
    */
   login(credentials: AuthRequest): Observable<AuthResponse> {
-    console.log('🔑 Intentando login:', credentials.nombreUsuario);
+    console.log('🔑 Intentando login con:', credentials.nombreUsuario);
+    console.log('📤 URL destino:', `${this.API_URL}/login`);
+    console.log('📦 Payload:', JSON.stringify(credentials));
     
     return this.http.post<AuthResponse>(`${this.API_URL}/login`, credentials)
       .pipe(
         tap(response => {
-          console.log('✅ Login exitoso, procesando token...');
+          console.log('✅ Login exitoso, respuesta del backend:', response);
+          
+          if (!response.token) {
+            console.error('❌ El backend no devolvió un token');
+            throw new Error('No se recibió token del servidor');
+          }
+          
           this.saveToken(response.token);
           
           const user = this.getUserFromToken();
           if (user) {
-            console.log('👤 Usuario decodificado:', {
+            console.log('👤 Usuario decodificado del token:', {
               nombreUsuario: user.nombreUsuario,
               rol: user.rol,
-              nombreCompleto: user.nombreCompleto
+              nombreCompleto: user.nombreCompleto,
+              email: user.email
             });
             this.currentUserSubject.next(user);
           } else {
@@ -58,41 +70,89 @@ export class AuthService {
           }
         }),
         catchError(error => {
-          console.error('❌ Error en login:', {
-            status: error.status,
-            mensaje: error.error?.message || error.message
-          });
-          return throwError(() => error);
+          console.error('❌ Error completo en login:', error);
+          console.error('Status:', error.status);
+          console.error('Status Text:', error.statusText);
+          console.error('Error message:', error.error);
+          console.error('URL intentada:', error.url);
+          
+          let errorMessage = 'Error desconocido al iniciar sesión';
+          
+          if (error.status === 0) {
+            errorMessage = 'No se pudo conectar con el servidor. Verifica:\n' +
+                          '1. Que el backend esté corriendo en http://localhost:8080\n' +
+                          '2. Que CORS esté configurado correctamente\n' +
+                          '3. Que no haya firewall bloqueando la conexión';
+          } else if (error.status === 401) {
+            errorMessage = 'Usuario o contraseña incorrectos';
+          } else if (error.status === 404) {
+            errorMessage = 'Endpoint no encontrado. Verifica la URL del backend';
+          } else if (error.status === 500) {
+            errorMessage = 'Error interno del servidor';
+          }
+          
+          return throwError(() => new Error(errorMessage));
         })
       );
   }
 
   /**
-   * ✅ CORRECCIÓN: Mejor manejo de errores en registro
+   * ✅ REGISTRO CORREGIDO
    */
   register(userData: RegisterRequest): Observable<AuthResponse> {
     console.log('📝 Registrando usuario:', {
       nombreUsuario: userData.nombreUsuario,
-      rol: userData.rol
+      rol: userData.rol,
+      email: userData.email
     });
+    console.log('📤 URL destino:', `${this.API_URL}/register`);
+    console.log('📦 Payload completo:', JSON.stringify(userData));
+    
+    // ✅ VALIDACIÓN ANTES DE ENVIAR
+    if (!userData.nombreUsuario || !userData.clave || !userData.nombreCompleto || !userData.rol) {
+      console.error('❌ Datos incompletos:', userData);
+      return throwError(() => new Error('Todos los campos son obligatorios'));
+    }
     
     return this.http.post<AuthResponse>(`${this.API_URL}/register`, userData)
       .pipe(
         tap(response => {
-          console.log('✅ Registro exitoso');
+          console.log('✅ Registro exitoso, respuesta del backend:', response);
+          
+          if (!response.token) {
+            console.error('❌ El backend no devolvió un token');
+            throw new Error('No se recibió token del servidor');
+          }
+          
           this.saveToken(response.token);
           
           const user = this.getUserFromToken();
           if (user) {
+            console.log('👤 Usuario registrado y decodificado:', user);
             this.currentUserSubject.next(user);
           }
         }),
         catchError(error => {
-          console.error('❌ Error en registro:', {
-            status: error.status,
-            mensaje: error.error?.message || error.message
-          });
-          return throwError(() => error);
+          console.error('❌ Error completo en registro:', error);
+          console.error('Status:', error.status);
+          console.error('Error message:', error.error);
+          console.error('URL intentada:', error.url);
+          
+          let errorMessage = 'Error desconocido al registrar usuario';
+          
+          if (error.status === 0) {
+            errorMessage = 'No se pudo conectar con el servidor. Verifica que el backend esté corriendo.';
+          } else if (error.status === 409) {
+            errorMessage = 'El nombre de usuario ya existe';
+          } else if (error.status === 400) {
+            errorMessage = 'Datos inválidos. Verifica todos los campos.';
+          } else if (error.status === 404) {
+            errorMessage = 'Endpoint no encontrado. Verifica la URL del backend';
+          } else if (error.status === 500) {
+            errorMessage = error.error?.message || 'Error interno del servidor';
+          }
+          
+          return throwError(() => new Error(errorMessage));
         })
       );
   }
@@ -106,6 +166,7 @@ export class AuthService {
   private saveToken(token: string): void {
     localStorage.setItem('token', token);
     console.log('💾 Token guardado en localStorage');
+    console.log('🔑 Token (primeros 50 caracteres):', token.substring(0, 50) + '...');
   }
 
   getToken(): string | null {
@@ -133,7 +194,7 @@ export class AuthService {
   }
 
   /**
-   * ✅ CORRECCIÓN: Validación robusta de roles al extraer del token
+   * ✅ EXTRACCIÓN DE USUARIO DEL TOKEN MEJORADA
    */
   private getUserFromToken(): Usuario | null {
     const token = this.getToken();
@@ -143,19 +204,13 @@ export class AuthService {
 
     try {
       const payload = this.decodeToken(token);
-      console.log('🔍 JWT PAYLOAD DECODIFICADO:', {
-        sub: payload.sub,
-        rol: payload.rol,
-        nombreCompleto: payload.nombreCompleto,
-        email: payload.email,
-        exp: new Date(payload.exp * 1000).toLocaleString()
-      });
+      console.log('🔍 JWT PAYLOAD DECODIFICADO:', payload);
       
-      // Extraer rol del token (puede venir como 'rol' o 'role')
+      // El backend guarda el rol en minúsculas: "admin" o "vendedor"
       const rolDelToken = payload.rol || payload.role;
       
       if (!rolDelToken) {
-        console.error('❌ ERROR CRÍTICO: No se encontró el campo "rol" en el token JWT');
+        console.error('❌ ERROR: No se encontró el campo "rol" en el token JWT');
         console.error('Payload completo:', payload);
         return null;
       }
@@ -167,10 +222,9 @@ export class AuthService {
         normalizado: rolNormalizado
       });
 
-      // ✅ VALIDAR que el rol sea válido
+      // Validar que el rol sea válido
       if (rolNormalizado !== 'admin' && rolNormalizado !== 'vendedor') {
         console.error('❌ ERROR: Rol inválido en token:', rolDelToken);
-        console.error('Roles válidos: "admin", "vendedor"');
         return null;
       }
 
@@ -241,7 +295,7 @@ export class AuthService {
   }
 
   /**
-   * ✅ CORRECCIÓN: Comparación de roles mejorada
+   * Comparación de roles mejorada
    */
   hasRole(rol: RolUsuario): boolean {
     const user = this.getCurrentUser();
@@ -264,18 +318,12 @@ export class AuthService {
     return hasRole;
   }
 
-  /**
-   * Verifica si el usuario actual es ADMIN
-   */
   isAdmin(): boolean {
     const result = this.hasRole(RolUsuario.ADMIN);
     console.log('👑 isAdmin():', result);
     return result;
   }
 
-  /**
-   * Verifica si el usuario actual es VENDEDOR
-   */
   isVendedor(): boolean {
     const result = this.hasRole(RolUsuario.VENDEDOR);
     console.log('💼 isVendedor():', result);
