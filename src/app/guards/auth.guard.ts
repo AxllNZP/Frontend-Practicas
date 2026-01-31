@@ -4,7 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { RolUsuario } from '../models/auth.models';
 
 /**
- * authGuard - Verifica si el usuario está autenticado
+ * ✅ authGuard - Verifica si el usuario está autenticado
  */
 export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -22,7 +22,7 @@ export const authGuard: CanActivateFn = (route, state) => {
 };
 
 /**
- * adminGuard - Verifica que el usuario sea ADMIN
+ * ✅ adminGuard - Verifica que el usuario sea ADMIN
  */
 export const adminGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -38,20 +38,28 @@ export const adminGuard: CanActivateFn = (route, state) => {
   const user = authService.getCurrentUser();
   console.log('👤 Usuario actual:', user);
   console.log('🎭 Rol del usuario:', user?.rol);
+  console.log('📊 Tipo de rol:', typeof user?.rol);
 
-  if (authService.isAdmin()) {
+  // ✅ COMPARACIÓN MEJORADA
+  const esAdmin = user?.rol === RolUsuario.ADMIN;
+  
+  console.log('🔍 ¿Es admin?', esAdmin);
+  console.log('🔍 RolUsuario.ADMIN =', RolUsuario.ADMIN);
+  console.log('🔍 user.rol =', user?.rol);
+
+  if (esAdmin) {
     console.log('✅ Usuario es ADMIN, acceso permitido');
     return true;
   }
 
-  console.log('❌ Usuario NO es ADMIN (rol:', user?.rol, '), acceso denegado');
+  console.log('❌ Usuario NO es ADMIN, acceso denegado');
   alert('⛔ Acceso denegado. Solo los administradores pueden acceder a esta sección.');
   
   return router.createUrlTree(['/dashboard/facturas']);
 };
 
 /**
- * vendedorGuard - Verifica que el usuario sea VENDEDOR o ADMIN
+ * ✅ vendedorGuard - Verifica que el usuario sea VENDEDOR o ADMIN
  */
 export const vendedorGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
@@ -63,7 +71,11 @@ export const vendedorGuard: CanActivateFn = (route, state) => {
 
   const user = authService.getCurrentUser();
   
-  if (user?.rol === RolUsuario.VENDEDOR || user?.rol === RolUsuario.ADMIN) {
+  const esVendedorOAdmin = 
+    user?.rol === RolUsuario.VENDEDOR || 
+    user?.rol === RolUsuario.ADMIN;
+  
+  if (esVendedorOAdmin) {
     console.log('✅ Usuario autorizado (vendedor o admin)');
     return true;
   }
