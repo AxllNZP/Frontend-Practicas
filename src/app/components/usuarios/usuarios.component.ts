@@ -1,26 +1,62 @@
+// src/app/components/usuarios/usuarios.component.ts - VERSIÓN ACTUALIZADA
+
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService, UsuarioDto } from '../../services/usuario.service';
 import { Subscription, interval } from 'rxjs';
 
+// 🔥 IMPORTAR EL NUEVO COMPONENTE MODAL
+import { ModalUsuarioComponent } from './modal-usuario/modal-usuario';
+
+/**
+ * 📖 COMPONENTE DE USUARIOS - VERSIÓN MEJORADA
+ * 
+ * CAMBIOS APLICADOS:
+ * ✅ Se eliminó todo el código HTML del modal inline
+ * ✅ Se agregó el componente ModalUsuarioComponent
+ * ✅ La lógica de creación/edición está SEPARADA
+ * ✅ Código mucho más limpio y mantenible
+ * 
+ * FLUJO DE TRABAJO:
+ * 1. Usuario hace clic en "Nuevo Usuario" o "Editar"
+ * 2. Se abre el modal (ModalUsuarioComponent)
+ * 3. Usuario llena/modifica el formulario
+ * 4. Modal emite evento con los datos
+ * 5. Este componente recibe los datos y llama al servicio
+ * 6. Backend procesa la petición
+ * 7. Se cierra el modal y se recarga la tabla
+ */
 @Component({
   selector: 'app-usuarios',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [
+    CommonModule, 
+    FormsModule,
+    ModalUsuarioComponent  // 🔥 AÑADIDO: Importar el modal
+  ],
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.css']
 })
 export class UsuariosComponent implements OnInit, OnDestroy {
 
+  // ========================================
+  // 📊 DATOS DE LA TABLA
+  // ========================================
   usuarios: UsuarioDto[] = [];
   lastUpdated: Date | null = null;
   cargando = false;
 
+  // ========================================
+  // 🎬 CONTROL DEL MODAL
+  // ========================================
   mostrarModal = false;
   modoEdicion = false;
-  usuarioSeleccionado: Partial<UsuarioDto> = {};
+  usuarioParaEditar?: UsuarioDto;  // 🔥 NUEVO: Usuario a editar
 
+  // ========================================
+  // ⏱️ POLLING
+  // ========================================
   private pollingSub?: Subscription;
   private readonly POLL_MS = 5000;
 
@@ -29,6 +65,10 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
+  // ========================================
+  // 🎬 LIFECYCLE HOOKS
+  // ========================================
+  
   ngOnInit(): void {
     console.log('=== USUARIOS COMPONENT INICIADO ===');
     this.cargarUsuarios();
@@ -41,6 +81,10 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
+  // ========================================
+  // 📥 CARGA DE DATOS
+  // ========================================
+  
   private cargarUsuarios(): void {
     if (this.cargando) return;
 
@@ -60,6 +104,10 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     });
   }
 
+  // ========================================
+  // ⏱️ POLLING
+  // ========================================
+  
   private startPolling(): void {
     this.stopPolling();
     this.pollingSub = interval(this.POLL_MS).subscribe(() => {
@@ -85,112 +133,124 @@ export class UsuariosComponent implements OnInit, OnDestroy {
     }
   };
 
-  // ===== MODAL =====
-
+  // ========================================
+  // 🎬 CONTROL DEL MODAL
+  // ========================================
+  
+  /**
+   * 🔥 NUEVO: Abre el modal en modo CREACIÓN
+   */
   abrirModalCrear(): void {
+    console.log('➕ Abriendo modal para crear usuario');
     this.stopPolling();
     this.modoEdicion = false;
-    this.usuarioSeleccionado = {
-      rol: 'vendedor',
-      estado: 'activo'
-    };
+    this.usuarioParaEditar = undefined;
     this.mostrarModal = true;
   }
 
+  /**
+   * 🔥 NUEVO: Abre el modal en modo EDICIÓN
+   */
   abrirModalEditar(usuario: UsuarioDto): void {
+    console.log('✏️ Abriendo modal para editar usuario:', usuario.nombreUsuario);
     this.stopPolling();
     this.modoEdicion = true;
-    this.usuarioSeleccionado = { ...usuario };
+    this.usuarioParaEditar = { ...usuario };  // Clonar para evitar mutaciones
     this.mostrarModal = true;
   }
 
-  cerrarModal(): void {
+  /**
+   * 🔥 NUEVO: Cierra el modal
+   */
+  onModalCerrar(): void {
+    console.log('❌ Modal de usuario cerrado');
     this.mostrarModal = false;
-    this.usuarioSeleccionado = {};
+    this.modoEdicion = false;
+    this.usuarioParaEditar = undefined;
     this.startPolling();
   }
 
-  guardarUsuario(): void {
-    if (!this.validarUsuario()) {
-      alert('Complete los campos obligatorios');
-      return;
-    }
-
-    const payload = {
-      nombreUsuario: this.usuarioSeleccionado.nombreUsuario,
-      clave: this.usuarioSeleccionado.clave,
-      nombreCompleto: this.usuarioSeleccionado.nombreCompleto,
-      email: this.usuarioSeleccionado.email,
-      rol: this.usuarioSeleccionado.rol,
-      estado: this.usuarioSeleccionado.estado
-    };
-
+  /**
+   * 🔥 NUEVO: Guarda los datos recibidos del modal
+   */
+  onModalGuardar(datos: any): void {
+    console.log('💾 Datos recibidos del modal:', datos);
+    
     this.stopPolling();
 
-    if (this.modoEdicion && this.usuarioSeleccionado.idUsuario) {
-      this.usuarioService.actualizar(this.usuarioSeleccionado.idUsuario, payload)
-        .subscribe({
-          next: () => {
-            alert('Usuario actualizado correctamente');
-            this.finalizarOperacion();
-          },
-          error: err => {
-            console.error(err);
-            alert('Error al actualizar usuario');
-            this.startPolling();
-          }
-        });
-    } else {
-      this.usuarioService.crear(payload).subscribe({
+    // Determinar si es creación o edición
+    if (this.modoEdicion && datos.idUsuario) {
+      // MODO EDICIÓN
+      this.usuarioService.actualizar(datos.idUsuario, datos).subscribe({
         next: () => {
-          alert('Usuario creado correctamente');
+          alert(`✅ Usuario "${datos.nombreUsuario}" actualizado correctamente`);
           this.finalizarOperacion();
         },
         error: err => {
-          console.error(err);
-          alert('Error al crear usuario');
+          console.error('❌ Error al actualizar usuario:', err);
+          alert('❌ Error al actualizar usuario: ' + (err.message || 'Error desconocido'));
+          this.startPolling();
+        }
+      });
+    } else {
+      // MODO CREACIÓN
+      this.usuarioService.crear(datos).subscribe({
+        next: () => {
+          alert(`✅ Usuario "${datos.nombreUsuario}" creado correctamente`);
+          this.finalizarOperacion();
+        },
+        error: err => {
+          console.error('❌ Error al crear usuario:', err);
+          alert('❌ Error al crear usuario: ' + (err.message || 'Error desconocido'));
           this.startPolling();
         }
       });
     }
   }
 
+  /**
+   * Finaliza la operación de guardar
+   */
   private finalizarOperacion(): void {
-    this.cerrarModal();
+    this.mostrarModal = false;
+    this.modoEdicion = false;
+    this.usuarioParaEditar = undefined;
     this.cargarUsuarios();
     this.startPolling();
   }
 
-  private validarUsuario(): boolean {
-    return !!(
-      this.usuarioSeleccionado.nombreUsuario &&
-      this.usuarioSeleccionado.clave &&
-      this.usuarioSeleccionado.nombreCompleto &&
-      this.usuarioSeleccionado.rol
-    );
-  }
-
+  // ========================================
+  // 🗑️ ELIMINAR USUARIO
+  // ========================================
+  
   confirmarEliminar(usuario: UsuarioDto): void {
     const ok = confirm(
       `¿Eliminar usuario?\n\n` +
       `Usuario: ${usuario.nombreUsuario}\n` +
-      `Nombre: ${usuario.nombreCompleto}`
+      `Nombre: ${usuario.nombreCompleto}\n\n` +
+      `Esta acción no se puede deshacer.`
     );
 
     if (!ok) return;
 
+    console.log('🗑️ Eliminando usuario:', usuario.idUsuario);
+
     this.usuarioService.eliminar(usuario.idUsuario).subscribe({
       next: () => {
-        alert(`Usuario eliminado correctamente`);
+        alert(`✅ Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
         this.cargarUsuarios();
       },
       error: err => {
-        console.error(err);
-        alert('Error al eliminar usuario');
+        console.error('❌ Error al eliminar usuario:', err);
+        alert('❌ Error al eliminar usuario: ' + (err.message || 'Error desconocido'));
       }
     });
   }
 
+  // ========================================
+  // 🛠️ UTILIDADES
+  // ========================================
+  
   formatearFecha(fecha: string): string {
     return new Date(fecha).toLocaleString('es-PE', {
       day: '2-digit',

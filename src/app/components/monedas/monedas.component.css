@@ -130,26 +130,7 @@ tbody td {
   transform: translateY(-2px);
 }
 
-/* ===== MODAL ===== */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.7);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 1000;
-}
 
-.modal-content {
-  background: white;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 400px;
-  padding: 24px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-  animation: modalIn 0.3s ease;
-}
 
 @keyframes modalIn {
   from {
@@ -162,48 +143,6 @@ tbody td {
   }
 }
 
-.modal-content h2 {
-  margin-bottom: 16px;
-  color: #2c3e50;
-}
 
-/* ===== INPUTS ===== */
-.modal-content input {
-  width: 100%;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 2px solid #e0e0e0;
-  font-size: 14px;
-}
 
-.modal-content input:focus {
-  outline: none;
-  border-color: #667eea;
-}
 
-/* ===== ACCIONES MODAL ===== */
-.acciones-modal {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-.acciones-modal button {
-  padding: 10px 18px;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  font-weight: 600;
-}
-
-.acciones-modal button:first-child {
-  background: #95a5a6;
-  color: white;
-}
-
-.acciones-modal button:last-child {
-  background: #27ae60;
-  color: white;
-}

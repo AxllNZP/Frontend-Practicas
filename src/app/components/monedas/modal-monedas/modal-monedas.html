@@ -1,0 +1,24 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
+
+  <div class="modal-content" (click)="onContentClick($event)">
+    <h2>{{ getTitulo() }}</h2>
+
+    <input
+      placeholder="Nombre"
+      [(ngModel)]="nombre">
+
+    <input
+      placeholder="Símbolo"
+      [(ngModel)]="simbolo">
+
+    <input
+      placeholder="Código (USD, EUR)"
+      [(ngModel)]="codigo">
+
+    <div class="acciones-modal">
+      <button (click)="cerrarModal()">Cancelar</button>
+      <button (click)="guardarMoneda()">Guardar</button>
+    </div>
+  </div>
+
+</div>

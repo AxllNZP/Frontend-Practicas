@@ -5,14 +5,16 @@ import {
   ChangeDetectorRef
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { MonedaService, MonedaDto } from '../../services/moneda.service';
 import { Subscription, interval } from 'rxjs';
+
+// 🔥 Modal separado
+import { ModalMonedaComponent } from './modal-monedas/modal-monedas';
 
 @Component({
   selector: 'app-monedas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, ModalMonedaComponent],
   templateUrl: './monedas.component.html',
   styleUrls: ['./monedas.component.css']
 })
@@ -24,7 +26,7 @@ export class MonedasComponent implements OnInit, OnDestroy {
 
   mostrarModal = false;
   modoEdicion = false;
-  monedaSeleccionada: Partial<MonedaDto> = {};
+  monedaParaEditar?: MonedaDto;
 
   private pollingSub?: Subscription;
   private readonly POLL_MS = 5000;
@@ -46,30 +48,28 @@ export class MonedasComponent implements OnInit, OnDestroy {
   }
 
   private cargarMonedas(): void {
-  if (this.cargando) return;
+    if (this.cargando) return;
 
-  this.cargando = true;
-  this.monedaService.listar().subscribe({
-    next: data => {
-      this.monedas = [...data];
-      this.lastUpdated = new Date();
-      this.cargando = false;
-      this.cdr.detectChanges(); // 🔥 ESTO ES LO QUE FALTABA
-    },
-    error: err => {
-      console.error('Error cargando monedas', err);
-      this.cargando = false;
-      this.cdr.detectChanges();
-    }
-  });
-}
+    this.cargando = true;
+    this.monedaService.listar().subscribe({
+      next: data => {
+        this.monedas = [...data];
+        this.lastUpdated = new Date();
+        this.cargando = false;
+        this.cdr.detectChanges();
+      },
+      error: err => {
+        console.error('Error cargando monedas', err);
+        this.cargando = false;
+        this.cdr.detectChanges();
+      }
+    });
+  }
 
   private startPolling(): void {
     this.stopPolling();
     this.pollingSub = interval(this.POLL_MS).subscribe(() => {
-      if (!this.cargando) {
-        this.cargarMonedas();
-      }
+      if (!this.cargando) this.cargarMonedas();
     });
   }
 
@@ -87,57 +87,87 @@ export class MonedasComponent implements OnInit, OnDestroy {
     }
   };
 
+  // =========================
+  // MODAL
+  // =========================
+
   abrirCrear(): void {
     this.stopPolling();
     this.modoEdicion = false;
-    this.monedaSeleccionada = {};
+    this.monedaParaEditar = undefined;
     this.mostrarModal = true;
   }
 
   abrirEditar(moneda: MonedaDto): void {
     this.stopPolling();
     this.modoEdicion = true;
-    this.monedaSeleccionada = { ...moneda };
+    this.monedaParaEditar = { ...moneda };
     this.mostrarModal = true;
   }
 
-  cerrarModal(): void {
+  onModalCerrar(): void {
     this.mostrarModal = false;
-    this.monedaSeleccionada = {};
+    this.modoEdicion = false;
+    this.monedaParaEditar = undefined;
     this.startPolling();
   }
 
-  guardar(): void {
-    const m = this.monedaSeleccionada;
-    if (!m.nombre || !m.codigo || !m.simbolo) {
-      alert('Complete todos los campos');
-      return;
-    }
+  onModalGuardar(payload: {
+    idMoneda?: number;
+    nombre: string;
+    simbolo: string;
+    codigo: string;
+  }): void {
 
-    if (this.modoEdicion && m.idMoneda) {
-      this.monedaService.actualizar(m.idMoneda, m).subscribe(() => {
-        alert('Moneda actualizada');
-        this.finalizar();
+    this.stopPolling();
+
+    if (this.modoEdicion && payload.idMoneda) {
+      this.monedaService.actualizar(payload.idMoneda, payload).subscribe({
+        next: () => {
+          alert('✅ Moneda actualizada');
+          this.finalizarOperacion();
+        },
+        error: err => {
+          alert('❌ Error al actualizar moneda');
+          console.error(err);
+          this.startPolling();
+        }
       });
     } else {
-      this.monedaService.crear(m).subscribe(() => {
-        alert('Moneda creada');
-        this.finalizar();
+      this.monedaService.crear(payload).subscribe({
+        next: () => {
+          alert('✅ Moneda creada');
+          this.finalizarOperacion();
+        },
+        error: err => {
+          alert('❌ Error al crear moneda');
+          console.error(err);
+          this.startPolling();
+        }
       });
     }
+  }
+
+  private finalizarOperacion(): void {
+    this.mostrarModal = false;
+    this.modoEdicion = false;
+    this.monedaParaEditar = undefined;
+    this.cargarMonedas();
+    this.startPolling();
   }
 
   eliminar(moneda: MonedaDto): void {
     if (!confirm(`¿Eliminar ${moneda.nombre} (${moneda.codigo})?`)) return;
 
-    this.monedaService.eliminar(moneda.idMoneda).subscribe(() => {
-      alert('Moneda eliminada');
-      this.cargarMonedas();
+    this.monedaService.eliminar(moneda.idMoneda).subscribe({
+      next: () => {
+        alert('🗑️ Moneda eliminada');
+        this.cargarMonedas();
+      },
+      error: err => {
+        alert('❌ Error al eliminar');
+        console.error(err);
+      }
     });
-  }
-
-  private finalizar(): void {
-    this.cerrarModal();
-    this.cargarMonedas();
   }
 }

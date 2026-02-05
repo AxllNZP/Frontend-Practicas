@@ -15,7 +15,6 @@ export class AuthService {
   
   private http = inject(HttpClient);
   
-  // ✅ URL CORREGIDA - Asegúrate que tu backend esté en este puerto
   private readonly API_URL = 'http://localhost:8080/api/auth';
   
   private currentUserSubject = new BehaviorSubject<Usuario | null>(this.getUserFromToken());

@@ -1,4 +1,20 @@
+<!-- src/app/components/usuarios/usuarios.component.html - VERSIÓN SIMPLIFICADA -->
+
+<!--
+  📖 TEMPLATE DE USUARIOS - VERSIÓN MEJORADA
+  
+  CAMBIOS APLICADOS:
+  ✅ Se eliminaron las ~60 líneas del formulario inline
+  ✅ Se reemplazó con UNA SOLA ETIQUETA: <app-modal-usuario>
+  ✅ Código mucho más limpio y legible
+  ✅ Separación clara entre tabla y formulario
+-->
+
 <div class="container">
+  
+  <!-- ========================================
+       HEADER
+       ======================================== -->
   <div class="header">
     <div class="header-content">
       <h1>👤 Gestión de Usuarios</h1>
@@ -13,10 +29,16 @@
     </p>
   </div>
 
+  <!-- ========================================
+       LOADING
+       ======================================== -->
   <div *ngIf="cargando" class="loading">
     <span>⏳ Cargando usuarios...</span>
   </div>
 
+  <!-- ========================================
+       TABLA DE USUARIOS
+       ======================================== -->
   <div class="table-container">
     <table>
       <thead>
@@ -32,91 +54,81 @@
         </tr>
       </thead>
       <tbody>
+        <!-- Filas de usuarios -->
         <tr *ngFor="let u of usuarios">
           <td>{{ u.idUsuario }}</td>
           <td><strong>{{ u.nombreUsuario }}</strong></td>
           <td>{{ u.nombreCompleto }}</td>
-          <td>{{ u.email || '-' }}</td>
-          <td>{{ u.rol }}</td>
+          <td class="email">{{ u.email || '-' }}</td>
+          <td>
+            <span class="badge" 
+                  [class.badge-admin]="u.rol === 'admin'"
+                  [class.badge-vendedor]="u.rol === 'vendedor'">
+              {{ u.rol | uppercase }}
+            </span>
+          </td>
           <td>
             <span [class]="getEstadoClass(u.estado)">
               {{ u.estado }}
             </span>
           </td>
-          <td>{{ formatearFecha(u.fechaRegistro) }}</td>
+          <td class="fecha">{{ formatearFecha(u.fechaRegistro) }}</td>
           <td class="acciones">
-            <button class="btn-editar" (click)="abrirModalEditar(u)">✏️</button>
-            <button class="btn-eliminar" (click)="confirmarEliminar(u)">🗑️</button>
+            <!-- Botón Editar -->
+            <button 
+              class="btn-editar" 
+              (click)="abrirModalEditar(u)"
+              title="Editar usuario">
+              ✏️
+            </button>
+            <!-- Botón Eliminar -->
+            <button 
+              class="btn-eliminar" 
+              (click)="confirmarEliminar(u)"
+              title="Eliminar usuario">
+              🗑️
+            </button>
           </td>
         </tr>
 
+        <!-- Mensaje cuando no hay datos -->
         <tr *ngIf="usuarios.length === 0 && !cargando">
           <td colspan="8" class="no-data">
-            👤 No hay usuarios registrados
+            📭 No hay usuarios registrados en el sistema
           </td>
         </tr>
       </tbody>
     </table>
   </div>
 
+  <!-- ========================================
+       FOOTER
+       ======================================== -->
   <div class="footer">
     <p>Total de usuarios: <strong>{{ usuarios.length }}</strong></p>
   </div>
+
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" *ngIf="mostrarModal" (click)="cerrarModal()">
-  <div class="modal-content" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>{{ modoEdicion ? '✏️ Editar Usuario' : '➕ Nuevo Usuario' }}</h2>
-      <button class="btn-close" (click)="cerrarModal()">✖</button>
-    </div>
-
-    <div class="modal-body">
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Usuario *</label>
-          <input [(ngModel)]="usuarioSeleccionado.nombreUsuario">
-        </div>
-
-        <div class="form-group">
-          <label>Contraseña *</label>
-          <input type="password" [(ngModel)]="usuarioSeleccionado.clave">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Nombre Completo *</label>
-          <input [(ngModel)]="usuarioSeleccionado.nombreCompleto">
-        </div>
-
-        <div class="form-group full-width">
-          <label>Email</label>
-          <input [(ngModel)]="usuarioSeleccionado.email">
-        </div>
-
-        <div class="form-group">
-          <label>Rol *</label>
-          <select [(ngModel)]="usuarioSeleccionado.rol">
-            <option value="admin">ADMIN</option>
-            <option value="vendedor">VENDEDOR</option>
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>Estado *</label>
-          <select [(ngModel)]="usuarioSeleccionado.estado">
-            <option value="activo">Activo</option>
-            <option value="inactivo">Inactivo</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
-      <button class="btn-guardar" (click)="guardarUsuario()">
-        {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-      </button>
-    </div>
-  </div>
-</div>
+<!-- ========================================
+     🔥 MODAL REUTILIZABLE
+     
+     ANTES: ~60 líneas de HTML inline
+     AHORA: Solo esta línea
+     
+     PROPIEDADES:
+     - isOpen: Controla visibilidad
+     - modoEdicion: true = editar, false = crear
+     - usuarioEditar: Datos a editar (solo en modo edición)
+     
+     EVENTOS:
+     - (cerrar): Se ejecuta al cerrar el modal
+     - (guardar): Se ejecuta al guardar, recibe los datos
+     ======================================== -->
+<app-modal-usuario
+  [isOpen]="mostrarModal"
+  [modoEdicion]="modoEdicion"
+  [usuarioEditar]="usuarioParaEditar"
+  (cerrar)="onModalCerrar()"
+  (guardar)="onModalGuardar($event)">
+</app-modal-usuario>
