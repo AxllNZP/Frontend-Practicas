@@ -1,0 +1,19 @@
+<div class="profile-container" *ngIf="user">
+
+  <div class="profile-card">
+    
+    <div class="avatar">
+      {{ getInitials() }}
+    </div>
+
+    <h2>{{ user.nombreCompleto }}</h2>
+
+    <div class="info">
+      <p><strong>Usuario:</strong> {{ user.nombreUsuario }}</p>
+      <p><strong>Email:</strong> {{ user.email }}</p>
+      <p><strong>Rol:</strong> {{ user.rol }}</p>
+    </div>
+
+  </div>
+
+</div>

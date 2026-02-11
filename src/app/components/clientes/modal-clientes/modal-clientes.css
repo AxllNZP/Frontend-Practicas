@@ -14,8 +14,8 @@
 
 /* Contenedor del modal */
 .modal-content {
-  width: 90%;
-  max-width: 900px;
+  width: 80%;
+  max-width: 600px; /* antes 900px */
   background: white;
   border-radius: 16px;
   overflow: hidden;
@@ -23,10 +23,11 @@
   animation: fadeIn 0.2s ease-out;
 }
 
+
 /* Header con gradiente */
 .modal-header {
   background: linear-gradient(90deg, #7371fc, #8649d3);
-  padding: 22px;
+  padding: 14px 20px;
   color: white;
   font-size: 26px;
   font-weight: 700;
@@ -57,8 +58,9 @@
 
 /* Cuerpo del modal */
 .modal-body {
-  padding: 30px;
+  padding: 18px 24px;
 }
+
 
 /* Labels */
 .modal-body label {
@@ -71,13 +73,14 @@
 .modal-body input,
 .modal-body select {
   width: 100%;
-  padding: 12px 14px;
-  margin-bottom: 18px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
   border-radius: 8px;
   border: 1px solid #d6d6d6;
   font-size: 15px;
   outline: none;
   transition: border 0.2s;
+  font-size: 14px;
 }
 
 .modal-body input:focus,
@@ -87,7 +90,7 @@
 
 /* Footer */
 .modal-footer {
-  padding: 18px 30px;
+  padding: 14px 20px;
   display: flex;
   justify-content: flex-end;
   gap: 15px;

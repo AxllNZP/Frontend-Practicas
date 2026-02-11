@@ -3,8 +3,14 @@
   <div class="header">
     <div class="header-content">
       <h1>🧾 Gestión de Facturas</h1>
-      <button class="btn-crear" (click)="abrirModalCrear()">
+      
+      <!-- 🔥 BOTÓN CON VALIDACIÓN -->
+      <button 
+        class="btn-crear" 
+        (click)="abrirModalCrear()"
+        [disabled]="!datosEsencialesCargados">
         ➕ Nueva Factura
+        <span *ngIf="!datosEsencialesCargados">⏳</span>
       </button>
     </div>
     <p class="last-update">
@@ -68,176 +74,13 @@
   </div>
 </div>
 
-<!-- MODAL CREAR FACTURA -->
-<div class="modal-overlay" *ngIf="mostrarModal">
-  <div class="modal-content modal-large" (click)="$event.stopPropagation()">
-    <div class="modal-header">
-      <h2>➕ Nueva Factura</h2>
-      <button class="btn-close" (click)="cerrarModal()">✖</button>
-    </div>
-
-    <div class="modal-body">
-      <!-- SECCIÓN 1: DATOS GENERALES -->
-      <div class="seccion">
-        <h3>📋 Datos Generales</h3>
-        <div class="form-grid">
-          <div class="form-group">
-            <label>Serie *</label>
-            <input 
-              type="text" 
-              [(ngModel)]="serie"
-              class="form-control"
-              placeholder="Ej: F001">
-          </div>
-
-          <div class="form-group">
-            <label>Cliente *</label>
-            <select [(ngModel)]="idCliente" class="form-control">
-              <option value="0">-- Seleccione --</option>
-              <option *ngFor="let c of clientes" [value]="c.idCliente">
-                {{ c.numeroDocumento }} - {{ c.nombreRazonSocial }}
-              </option>
-            </select>
-          </div>
-
-          <div class="form-group">
-  <label>Usuario *</label>
-  <select [(ngModel)]="idUsuario" class="form-control">
-    <option value="0">-- Seleccione --</option>
-    <option *ngFor="let u of usuarios" [value]="u.idUsuario">
-      {{ u.nombreCompleto }} ({{ u.nombreUsuario }})
-    </option>
-  </select>
-</div>
-
-          <div class="form-group">
-  <label>Moneda *</label>
-  <select [(ngModel)]="idMoneda" class="form-control">
-    <option value="0" disabled>Seleccione una moneda</option>
-    <option 
-      *ngFor="let moneda of monedas" 
-      [value]="moneda.idMoneda">
-      {{ moneda.codigo }} - {{ moneda.nombre }} ({{ moneda.simbolo }})
-    </option>
-  </select>
-</div>
-
-          <div class="form-group full-width">
-            <label>Observaciones</label>
-            <textarea 
-              [(ngModel)]="observaciones"
-              class="form-control"
-              rows="2"
-              placeholder="Comentarios opcionales..."></textarea>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN 2: DETALLES (PRODUCTOS) -->
-      <div class="seccion">
-        <div class="seccion-header">
-          <h3>📦 Productos</h3>
-          <button class="btn-agregar" (click)="agregarDetalle()">
-            ➕ Agregar Producto
-          </button>
-        </div>
-
-        <div class="detalles-lista">
-          <div *ngFor="let detalle of detalles; let i = index" class="detalle-item">
-            <div class="detalle-campos">
-              <div class="form-group">
-                <label>ID Producto *</label>
-                <div class="form-group">
-                    <label>Producto *</label>
-                    <select [(ngModel)]="detalle.idProducto" class="form-control">
-                      <option value="0">-- Seleccione producto --</option>
-                      <option *ngFor="let p of productos" [value]="p.idProducto">
-                      {{ p.nombre }} | Stock: {{ p.stock }} | S/ {{ p.precio }}
-                      </option>
-                    </select>
-                  </div>
-              </div>
-
-              <div class="form-group">
-                <label>Cantidad *</label>
-                <input 
-                  type="number" 
-                  [(ngModel)]="detalle.cantidad"
-                  class="form-control"
-                  min="1"
-                  placeholder="Cant.">
-              </div>
-
-              <button class="btn-eliminar-item" (click)="eliminarDetalle(i)">
-                🗑️
-              </button>
-            </div>
-          </div>
-
-          <div *ngIf="detalles.length === 0" class="lista-vacia">
-            📭 No hay productos agregados
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN 3: PAGOS -->
-      <div class="seccion">
-        <div class="seccion-header">
-          <h3>💰 Pagos (Opcional)</h3>
-          <button class="btn-agregar" (click)="agregarPago()">
-            ➕ Agregar Pago
-          </button>
-        </div>
-
-        <div class="detalles-lista">
-          <div *ngFor="let pago of pagos; let i = index" class="detalle-item">
-            <div class="pago-campos">
-              <div class="form-group">
-                <label>Monto *</label>
-                <input 
-                  type="number" 
-                  [(ngModel)]="pago.monto"
-                  class="form-control"
-                  step="0.01"
-                  placeholder="0.00">
-              </div>
-
-              <div class="form-group">
-                <label>Forma Pago *</label>
-                <select [(ngModel)]="pago.idFormaPago" class="form-control">
-                  <option value="1">Efectivo</option>
-                  <option value="2">Transferencia</option>
-                  <option value="3">Tarjeta</option>
-                </select>
-              </div>
-
-              <div class="form-group">
-                <label>N° Operación</label>
-                <input 
-                  type="text" 
-                  [(ngModel)]="pago.numeroOperacion"
-                  class="form-control"
-                  placeholder="OP-123456">
-              </div>
-
-              <button class="btn-eliminar-item" (click)="eliminarPago(i)">
-                🗑️
-              </button>
-            </div>
-          </div>
-
-          <div *ngIf="pagos.length === 0" class="lista-vacia">
-            💳 Sin pagos registrados
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
-      <button class="btn-guardar" (click)="guardarFactura()">
-        💾 Crear Factura
-      </button>
-    </div>
-  </div>
-</div>
+<!-- 🔥 MODAL - Se pasan los datos ya cargados -->
+<app-modal-facturas
+  *ngIf="mostrarModal"
+  [clientes]="clientes"
+  [usuarios]="usuarios"
+  [productos]="productos"
+  [monedas]="monedas"
+  (close)="cerrarModal()"
+  (facturaCreada)="onFacturaCreada()">
+</app-modal-facturas>

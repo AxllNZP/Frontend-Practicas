@@ -2,17 +2,20 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FacturaService, FacturaRequestDTO, FacturaResponseDTO, DetalleFacturaDTO, PagoDTO } from '../../services/factura.service';
+import { FacturaService, FacturaResponseDTO } from '../../services/factura.service';
 import { ClienteService, ClienteDto } from '../../services/cliente.service';
 import { Subscription, interval } from 'rxjs';
 import { UsuarioService, UsuarioDto } from '../../services/usuario.service';
 import { ProductoService, ProductoDto } from '../../services/producto.service';
 import { MonedaService, MonedaDto } from '../../services/moneda.service';
+import { AuthService } from '../../services/auth.service';
+import { RolUsuario } from '../../models/auth.models';
+import { ModalFacturasComponent } from './modal-facturas/modal-facturas';
 
 @Component({
   selector: 'app-facturas',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ModalFacturasComponent],
   templateUrl: './facturas.component.html',
   styleUrls: ['./facturas.component.css']
 })
@@ -25,20 +28,11 @@ export class FacturasComponent implements OnInit, OnDestroy {
   productos: ProductoDto[] = [];
   monedas: MonedaDto[] = [];
 
+  // 🔥 Bandera para controlar cuando están listos los datos
+  datosEsencialesCargados = false;
+
   // Para el modal de crear
   mostrarModal = false;
-  
-  // Datos de la factura
-  serie: string = 'F001';
-  observaciones: string = '';
-  idCliente: number = 0;
-  idUsuario: number = 1; // Usuario por defecto
-  idMoneda: number = 1;
-    // Moneda por defecto (PEN)
-
-  // Listas dinámicas
-  detalles: DetalleFacturaDTO[] = [];
-  pagos: PagoDTO[] = [];
 
   private pollingSub?: Subscription;
   private readonly POLL_MS = 5000;
@@ -49,6 +43,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
     private usuarioService: UsuarioService,
     private productoService: ProductoService,
     private monedaService: MonedaService,
+    private authService: AuthService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -56,9 +51,19 @@ export class FacturasComponent implements OnInit, OnDestroy {
     console.log('=== FACTURAS COMPONENT INICIADO ===');
     this.cargarFacturas();
     this.cargarClientes();
-    this.cargarUsuarios();
-    this.cargarProductos();
-    this.cargarMonedas();
+    
+    // 🔥 Verificar si es vendedor antes de cargar datos
+    const currentUser = this.authService.getCurrentUser();
+    const esVendedor = currentUser?.rol === RolUsuario.VENDEDOR;
+    
+    if (esVendedor) {
+      console.log('👤 Usuario es VENDEDOR - Cargando solo productos');
+      this.cargarDatosParaVendedor();
+    } else {
+      console.log('👑 Usuario es ADMIN - Cargando todos los datos');
+      this.cargarDatosEsenciales();
+    }
+    
     this.startPolling();
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
   }
@@ -68,43 +73,93 @@ export class FacturasComponent implements OnInit, OnDestroy {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
-
-  private cargarMonedas(): void {
-    this.monedaService.listar().subscribe({
+  // ==========================================
+  // 🔥 CARGA DE DATOS PARA VENDEDORES
+  // ==========================================
+  private cargarDatosParaVendedor(): void {
+    console.log('🔄 Cargando solo productos para vendedor...');
+    
+    // Solo cargar productos (los vendedores SÍ pueden ver productos)
+    this.productoService.listar().subscribe({
       next: data => {
-        this.monedas = data;
-        console.log('✓ Monedas cargadas:', this.monedas);
+        this.productos = data.filter(p => p.estado === 'activo' && p.stock > 0);
+        console.log('✓ Productos cargados:', this.productos.length);
         
-        // Opcional: establecer la primera moneda como predeterminada si existe
-        if (this.monedas.length > 0 && !this.idMoneda) {
-          this.idMoneda = this.monedas[0].idMoneda;
-        }
+        // Marcar como cargado (usuarios y monedas se manejan en el modal)
+        this.datosEsencialesCargados = true;
+        console.log('✅ Datos para vendedor listos');
       },
-      error: err => console.error('Error al cargar monedas:', err)
+      error: err => {
+        console.error('❌ Error al cargar productos:', err);
+        // Permitir continuar aunque falle
+        this.datosEsencialesCargados = true;
+      }
     });
   }
 
-  private cargarProductos(): void {
-  this.productoService.listar().subscribe({
-    next: data => {
-      this.productos = data.filter(
-        p => p.estado === 'activo' && p.stock > 0
-      );
-    },
-    error: err => console.error('Error al cargar productos', err)
-  });
-}
+  // ==========================================
+  // 🔥 CARGA DE DATOS PARA ADMINISTRADORES
+  // ==========================================
+  private cargarDatosEsenciales(): void {
+    let cargados = 0;
+    const totalNecesarios = 3; // usuarios, productos, monedas
 
-  private cargarUsuarios(): void {
-  this.usuarioService.listar().subscribe({
-    next: data => {
-      this.usuarios = data.filter(u => u.estado === 'activo');
-    },
-    error: err => console.error('Error al cargar usuarios', err)
-  });
-}
+    const verificarCarga = () => {
+      cargados++;
+      console.log(`📊 Progreso: ${cargados}/${totalNecesarios}`);
+      
+      if (cargados === totalNecesarios) {
+        this.datosEsencialesCargados = true;
+        console.log('✅ Todos los datos esenciales cargados');
+        console.log(`   - Usuarios: ${this.usuarios.length}`);
+        console.log(`   - Productos: ${this.productos.length}`);
+        console.log(`   - Monedas: ${this.monedas.length}`);
+      }
+    };
 
+    // Cargar usuarios
+    this.usuarioService.listar().subscribe({
+      next: data => {
+        this.usuarios = data.filter(u => u.estado === 'activo');
+        console.log('✓ Usuarios cargados:', this.usuarios.length);
+        verificarCarga();
+      },
+      error: err => {
+        console.error('❌ Error al cargar usuarios:', err);
+        verificarCarga(); // Continuar aunque falle
+      }
+    });
 
+    // Cargar productos
+    this.productoService.listar().subscribe({
+      next: data => {
+        this.productos = data.filter(p => p.estado === 'activo' && p.stock > 0);
+        console.log('✓ Productos cargados:', this.productos.length);
+        verificarCarga();
+      },
+      error: err => {
+        console.error('❌ Error al cargar productos:', err);
+        verificarCarga();
+      }
+    });
+
+    // Cargar monedas
+    this.monedaService.listar().subscribe({
+      next: data => {
+        this.monedas = data;
+        console.log('✓ Monedas cargadas:', this.monedas.length);
+        verificarCarga();
+      },
+      error: err => {
+        console.error('❌ Error al cargar monedas:', err);
+        verificarCarga();
+      }
+    });
+  }
+
+  // ==========================================
+  // CARGAR FACTURAS Y CLIENTES
+  // ==========================================
   private cargarFacturas(): void {
     if (this.cargando) return;
     
@@ -128,11 +183,15 @@ export class FacturasComponent implements OnInit, OnDestroy {
     this.clienteService.listar().subscribe({
       next: data => {
         this.clientes = data.filter(c => c.estado === 'activo');
+        console.log('✓ Clientes cargados:', this.clientes.length);
       },
-      error: err => console.error('Error al cargar clientes:', err)
+      error: err => console.error('❌ Error al cargar clientes:', err)
     });
   }
 
+  // ==========================================
+  // POLLING
+  // ==========================================
   private startPolling(): void {
     this.stopPolling();
     console.log('--- Iniciando polling de facturas ---');
@@ -159,100 +218,55 @@ export class FacturasComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ===== MODAL =====
+  // ==========================================
+  // 🔥 MODAL - CON VALIDACIÓN DE DATOS CARGADOS
+  // ==========================================
   abrirModalCrear(): void {
+    // Validar que los datos necesarios estén cargados
+    if (!this.datosEsencialesCargados) {
+      alert('⏳ Cargando datos necesarios, espere un momento...');
+      return;
+    }
+
+    const currentUser = this.authService.getCurrentUser();
+    const esVendedor = currentUser?.rol === RolUsuario.VENDEDOR;
+
+    // Para vendedores, validar al menos productos
+    if (esVendedor && this.productos.length === 0) {
+      alert('⚠️ No hay productos disponibles para crear facturas.');
+      return;
+    }
+
+    // Para admins, validar todos los datos
+    if (!esVendedor && (this.usuarios.length === 0 || this.monedas.length === 0)) {
+      alert('⚠️ No se pudieron cargar los datos necesarios. Intente recargar la página.');
+      return;
+    }
+
+    console.log('🚀 Abriendo modal con datos:', {
+      rol: currentUser?.rol,
+      usuarios: this.usuarios.length,
+      productos: this.productos.length,
+      monedas: this.monedas.length,
+      clientes: this.clientes.length
+    });
+
     this.stopPolling();
-    this.limpiarFormulario();
     this.mostrarModal = true;
   }
 
   cerrarModal(): void {
     this.mostrarModal = false;
-    this.limpiarFormulario();
     this.startPolling();
   }
 
-  private limpiarFormulario(): void {
-    this.serie = 'F001';
-    this.observaciones = '';
-    this.idCliente = 0;
-    this.idUsuario = 1;
-    this.idMoneda = 1;
-    this.detalles = [];
-    this.pagos = [];
+  onFacturaCreada(): void {
+    this.cargarFacturas();
   }
 
-  // ===== DETALLES (PRODUCTOS) =====
-  agregarDetalle(): void {
-    this.detalles.push({
-      idProducto: 0,
-      cantidad: 1
-    });
-  }
-
-  eliminarDetalle(index: number): void {
-    this.detalles.splice(index, 1);
-  }
-
-  // ===== PAGOS =====
-  agregarPago(): void {
-    this.pagos.push({
-      monto: 0,
-      numeroOperacion: '',
-      idFormaPago: 1,
-      idMoneda: 1,
-      idUsuario: 1
-    });
-  }
-
-  eliminarPago(index: number): void {
-    this.pagos.splice(index, 1);
-  }
-
-  // ===== GUARDAR FACTURA =====
-  guardarFactura(): void {
-    if (!this.validarFactura()) {
-      alert('Por favor complete todos los campos obligatorios');
-      return;
-    }
-
-    const payload: FacturaRequestDTO = {
-      serie: this.serie,
-      observaciones: this.observaciones,
-      idCliente: this.idCliente,
-      idUsuario: this.idUsuario,
-      idMoneda: this.idMoneda,
-      detalles: this.detalles,
-      pagos: this.pagos.length > 0 ? this.pagos : []
-    };
-
-    this.stopPolling();
-
-    this.facturaService.crear(payload).subscribe({
-      next: (response) => {
-        alert(`✅ Factura ${response.serie}-${response.numero} creada correctamente\n\nTotal: ${response.simboloMoneda} ${response.total}`);
-        this.cerrarModal();
-        this.cargarFacturas();
-        this.startPolling();
-      },
-      error: err => {
-        console.error(err);
-        alert('❌ Error al crear factura: ' + (err.error?.message || err.message));
-        this.startPolling();
-      }
-    });
-  }
-
-  private validarFactura(): boolean {
-    return !!(
-      this.serie &&
-      this.idCliente > 0 &&
-      this.detalles.length > 0 &&
-      this.detalles.every(d => d.idProducto > 0 && d.cantidad > 0)
-    );
-  }
-
-  // ===== UTILIDADES =====
+  // ==========================================
+  // UTILIDADES
+  // ==========================================
   formatearFecha(fecha: string): string {
     return new Date(fecha).toLocaleString('es-PE', {
       day: '2-digit',

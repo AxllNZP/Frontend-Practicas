@@ -6,6 +6,8 @@ import { ProductosComponent } from './components/productos/productos.component';
 import { FacturasComponent } from './components/Facturas/facturas.component';
 import { UsuariosComponent } from './components/usuarios/usuarios.component';
 import { MonedasComponent } from './components/monedas/monedas.component';
+import { ProfileComponent } from './components/profile/profile.component';
+
 
 export const routes: Routes = [
 
@@ -33,6 +35,13 @@ export const routes: Routes = [
         .then(m => m.DashboardComponent),
     canActivate: [authGuard],
     children: [
+
+
+      
+      {
+        path: 'profile',
+        component: ProfileComponent
+      },
       
       { 
         path: '', 

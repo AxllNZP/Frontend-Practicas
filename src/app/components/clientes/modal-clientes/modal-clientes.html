@@ -1,29 +1,50 @@
 <div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
 
   <div class="modal-content" (click)="onContentClick($event)">
-    <h2>{{ getTitulo() }}</h2>
 
-    <select [(ngModel)]="cliente.tipoDocumento">
-      <option value="DNI">DNI</option>
-      <option value="RUC">RUC</option>
-      <option value="CE">CE</option>
-      <option value="PASAPORTE">PASAPORTE</option>
-    </select>
-
-    <input placeholder="N° Documento" [(ngModel)]="cliente.numeroDocumento">
-    <input placeholder="Nombre / Razón Social" [(ngModel)]="cliente.nombreRazonSocial">
-    <input placeholder="Dirección" [(ngModel)]="cliente.direccion">
-    <input placeholder="Teléfono" [(ngModel)]="cliente.telefono">
-    <input placeholder="Email" [(ngModel)]="cliente.email">
-
-    <select [(ngModel)]="cliente.estado">
-      <option value="activo">Activo</option>
-      <option value="inactivo">Inactivo</option>
-    </select>
-
-    <div class="acciones-modal">
-      <button (click)="cerrarModal()">Cancelar</button>
-      <button (click)="guardarCliente()">Guardar</button>
+    <div class="modal-header">
+      <i>➕</i>
+      {{ getTitulo() }}
+      <button class="close-btn" (click)="cerrarModal()">✖</button>
     </div>
+
+    <div class="modal-body">
+
+      <label>Tipo Documento</label>
+      <select [(ngModel)]="cliente.tipoDocumento">
+        <option value="DNI">DNI</option>
+        <option value="RUC">RUC</option>
+        <option value="CE">CE</option>
+        <option value="PASAPORTE">PASAPORTE</option>
+      </select>
+
+      <label>N° Documento</label>
+      <input [(ngModel)]="cliente.numeroDocumento" placeholder="N° Documento">
+
+      <label>Nombre / Razón Social</label>
+      <input [(ngModel)]="cliente.nombreRazonSocial" placeholder="Nombre o Razón Social">
+
+      <label>Dirección</label>
+      <input [(ngModel)]="cliente.direccion" placeholder="Dirección">
+
+      <label>Teléfono</label>
+      <input [(ngModel)]="cliente.telefono" placeholder="Teléfono">
+
+      <label>Email</label>
+      <input [(ngModel)]="cliente.email" placeholder="Email">
+
+      <label>Estado</label>
+      <select [(ngModel)]="cliente.estado">
+        <option value="activo">Activo</option>
+        <option value="inactivo">Inactivo</option>
+      </select>
+
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarCliente()">Guardar</button>
+    </div>
+
   </div>
 </div>
