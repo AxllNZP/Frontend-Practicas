@@ -1,1 +1,29 @@
-<p>modal-clientes works!</p>
+<div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
+
+  <div class="modal-content" (click)="onContentClick($event)">
+    <h2>{{ getTitulo() }}</h2>
+
+    <select [(ngModel)]="cliente.tipoDocumento">
+      <option value="DNI">DNI</option>
+      <option value="RUC">RUC</option>
+      <option value="CE">CE</option>
+      <option value="PASAPORTE">PASAPORTE</option>
+    </select>
+
+    <input placeholder="N° Documento" [(ngModel)]="cliente.numeroDocumento">
+    <input placeholder="Nombre / Razón Social" [(ngModel)]="cliente.nombreRazonSocial">
+    <input placeholder="Dirección" [(ngModel)]="cliente.direccion">
+    <input placeholder="Teléfono" [(ngModel)]="cliente.telefono">
+    <input placeholder="Email" [(ngModel)]="cliente.email">
+
+    <select [(ngModel)]="cliente.estado">
+      <option value="activo">Activo</option>
+      <option value="inactivo">Inactivo</option>
+    </select>
+
+    <div class="acciones-modal">
+      <button (click)="cerrarModal()">Cancelar</button>
+      <button (click)="guardarCliente()">Guardar</button>
+    </div>
+  </div>
+</div>

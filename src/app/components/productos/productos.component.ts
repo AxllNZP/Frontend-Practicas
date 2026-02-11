@@ -4,11 +4,12 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService, ProductoDto, EstadoGeneral } from '../../services/producto.service';
 import { Subscription, interval } from 'rxjs';
+import { ProductoModalComponent } from './modal-productos/modal-productos';
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule,ProductoModalComponent],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css']
 })
@@ -103,7 +104,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.startPolling();
   }
 
-  guardarProducto(): void {
+  guardarProducto(producto: Partial<ProductoDto>): void {
+    this.productoSeleccionado = { ...this.productoSeleccionado, ...producto };
     if (!this.productoSeleccionado.codigo || !this.productoSeleccionado.nombre) {
       alert('Código y nombre son obligatorios');
       return;
