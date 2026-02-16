@@ -2,15 +2,19 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { FacturaService, FacturaResponseDTO } from '../../services/factura.service';
+import { FacturaService, FacturaResponseDTO, FacturaRequestDTO } from '../../services/factura.service';
 import { ClienteService, ClienteDto } from '../../services/cliente.service';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, firstValueFrom } from 'rxjs'; // 👈 Agrega firstValueFrom
+import { MatDialog } from '@angular/material/dialog';
+import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
 import { UsuarioService, UsuarioDto } from '../../services/usuario.service';
 import { ProductoService, ProductoDto } from '../../services/producto.service';
 import { MonedaService, MonedaDto } from '../../services/moneda.service';
 import { AuthService } from '../../services/auth.service';
 import { RolUsuario } from '../../models/auth.models';
 import { ModalFacturasComponent } from './modal-facturas/modal-facturas';
+import html2canvas from 'html2canvas';
+
 
 @Component({
   selector: 'app-facturas',
@@ -27,6 +31,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
   usuarios: UsuarioDto[] = [];
   productos: ProductoDto[] = [];
   monedas: MonedaDto[] = [];
+  guardando = false;
 
   // 🔥 Bandera para controlar cuando están listos los datos
   datosEsencialesCargados = false;
@@ -44,7 +49,8 @@ export class FacturasComponent implements OnInit, OnDestroy {
     private productoService: ProductoService,
     private monedaService: MonedaService,
     private authService: AuthService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -230,9 +236,39 @@ export class FacturasComponent implements OnInit, OnDestroy {
     this.startPolling();
   }
 
-  onFacturaCreada(): void {
+  async onFacturaCreada(payload: FacturaRequestDTO): Promise<void> {
+  if (this.guardando) return;
+
+  this.guardando = true;
+  this.cdr.detectChanges();
+
+  try {
+    await firstValueFrom(this.facturaService.crear(payload));
+
+    await this.mostrarDialogo({
+      tipo: 'success',
+      titulo: '✅ Factura Creada',
+      mensaje: `La factura se creó exitosamente para el cliente seleccionado`
+    });
+
+    this.cerrarModal();
     this.cargarFacturas();
+
+  } catch (error: any) {
+    console.error('Error al crear factura:', error);
+    
+    const mensajeError = error.error?.message || error.message || 'Error desconocido';
+    
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Crear Factura',
+      mensaje: `No se pudo crear la factura.\n\n${mensajeError}`
+    });
+  } finally {
+    this.guardando = false;
+    this.cdr.detectChanges();
   }
+}
 
   // ==========================================
   // UTILIDADES
@@ -252,4 +288,37 @@ export class FacturasComponent implements OnInit, OnDestroy {
     if (saldo > 0) return 'saldo-pendiente';
     return '';
   }
+
+  descargarPdf(id: number) {
+  this.facturaService.descargarPdf(id).subscribe(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'factura.pdf';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+}
+
+descargarExcel(id: number) {
+  this.facturaService.descargarExcel(id).subscribe(blob => {
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'factura.xlsx';
+    a.click();
+    window.URL.revokeObjectURL(url);
+  });
+}
+
+private async mostrarDialogo(data: FeedbackDialogData): Promise<boolean> {
+  const dialogRef = this.dialog.open(FeedbackDialogComponent, {
+    width: '400px',
+    disableClose: true,
+    data: data
+  });
+
+  const resultado = await firstValueFrom(dialogRef.afterClosed());
+  return resultado === true;
+}
 }

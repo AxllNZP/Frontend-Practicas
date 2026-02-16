@@ -1,110 +1,123 @@
-/* src/app/components/facturas/facturas.component.css */
-
+/* ===== CONTAINER ===== */
 .container {
-  padding: 20px;
-  max-width: 1400px;
+  padding: 30px;
+  max-width: 1500px;
   margin: 0 auto;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
 }
 
 /* ===== HEADER ===== */
 .header {
-  margin-bottom: 25px;
+  margin-bottom: 30px;
 }
 
 .header-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 8px;
 }
 
 .header h1 {
-  font-size: 28px;
-  color: #2c3e50;
+  font-size: 30px;
+  font-weight: 700;
+  color: #1e293b;
   margin: 0;
 }
 
+.last-update {
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+/* ===== BOTÓN CREAR ===== */
 .btn-crear {
-  background: #27ae60;
+  background: linear-gradient(135deg, #16a34a, #22c55e);
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
-  font-size: 15px;
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-size: 14px;
   cursor: pointer;
   font-weight: 600;
-  transition: all 0.3s;
+  transition: all 0.25s ease;
+  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25);
 }
 
 .btn-crear:hover {
-  background: #229954;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  box-shadow: 0 6px 18px rgba(34, 197, 94, 0.35);
 }
 
-.last-update {
-  color: #7f8c8d;
-  font-size: 14px;
+.btn-crear:disabled {
+  background: #cbd5e1;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* ===== LOADING ===== */
 .loading {
   text-align: center;
-  padding: 40px;
+  padding: 50px;
   font-size: 18px;
-  color: #3498db;
+  color: #3b82f6;
+  font-weight: 500;
 }
 
-/* ===== TABLA ===== */
+/* ===== TABLE CONTAINER ===== */
 .table-container {
   background: white;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  overflow-x: auto;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
+/* ===== TABLE ===== */
 table {
   width: 100%;
   border-collapse: collapse;
+  font-size: 14px;
 }
 
+/* HEADER */
 thead {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #0f172a;
   color: white;
 }
 
 thead th {
-  padding: 16px 12px;
+  padding: 18px 14px;
   text-align: left;
   font-weight: 600;
-  font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+}
+
+/* BODY */
+tbody td {
+  padding: 16px 14px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
 }
 
 tbody tr {
-  border-bottom: 1px solid #ecf0f1;
-  transition: background 0.2s;
+  transition: all 0.2s ease;
 }
 
 tbody tr:hover {
-  background: #f8f9fa;
+  background: #f8fafc;
 }
 
-tbody td {
-  padding: 14px 12px;
-  font-size: 14px;
-  color: #2c3e50;
-}
-
+/* ===== COLUMN STYLES ===== */
 .nombre {
   font-weight: 600;
-  color: #2980b9;
+  color: #2563eb;
 }
 
 .fecha {
-  color: #7f8c8d;
   font-size: 13px;
+  color: #64748b;
 }
 
 .monto {
@@ -112,38 +125,102 @@ tbody td {
   font-family: 'Courier New', monospace;
 }
 
+/* ===== SALDOS ===== */
 .saldo-pagado {
-  background: #d4edda;
-  color: #155724;
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: #dcfce7;
+  color: #166534;
+  padding: 6px 10px;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 13px;
 }
 
 .saldo-pendiente {
-  background: #fff3cd;
-  color: #856404;
-  padding: 4px 8px;
-  border-radius: 4px;
+  background: #fef9c3;
+  color: #854d0e;
+  padding: 6px 10px;
+  border-radius: 6px;
   font-weight: 600;
+  font-size: 13px;
 }
 
+/* ===== BOTONES ACCIONES ===== */
+.acciones {
+  display: flex;
+  gap: 8px;
+}
+
+.acciones button {
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+/* PDF */
+.acciones button:first-child {
+  background: #ef4444;
+  color: white;
+}
+
+.acciones button:first-child:hover {
+  background: #dc2626;
+}
+
+/* EXCEL */
+.acciones button:last-child {
+  background: #16a34a;
+  color: white;
+}
+
+.acciones button:last-child:hover {
+  background: #15803d;
+}
+
+/* ===== NO DATA ===== */
 .no-data {
   text-align: center;
   padding: 60px 20px;
-  color: #95a5a6;
+  color: #94a3b8;
   font-size: 16px;
 }
 
 /* ===== FOOTER ===== */
 .footer {
-  margin-top: 20px;
+  margin-top: 25px;
   text-align: center;
-  color: #7f8c8d;
+  color: #64748b;
   font-size: 14px;
 }
 
 .footer strong {
-  color: #2c3e50;
+  color: #0f172a;
+  font-weight: 700;
 }
 
+/* ===== RESPONSIVE ===== */
+@media (max-width: 1200px) {
+  table {
+    font-size: 13px;
+  }
+
+  thead th,
+  tbody td {
+    padding: 12px 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .acciones {
+    flex-direction: column;
+  }
+}

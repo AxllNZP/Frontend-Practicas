@@ -16,9 +16,15 @@
       [(ngModel)]="codigo">
 
     <div class="acciones-modal">
-      <button (click)="cerrarModal()">Cancelar</button>
-      <button (click)="guardarMoneda()">Guardar</button>
-    </div>
-  </div>
+  <button (click)="cerrarModal()"
+          [disabled]="guardando">
+    Cancelar
+  </button>
+  
+  <button (click)="guardarMoneda()"
+          [disabled]="guardando">
+    {{ guardando ? '⏳ Guardando...' : 'Guardar' }}
+  </button>
+</div>
 
 </div>

@@ -92,4 +92,16 @@ export class FacturaService {
     return this.http.get<FacturaResponseDTO[]>(`${this.apiUrl}/usuario/${idUsuario}`);
   }
   
+  descargarPdf(id: number) {
+  return this.http.get(`http://localhost:8080/api/facturas/${id}/pdf`, {
+    responseType: 'blob'
+  });
+}
+
+descargarExcel(id: number) {
+  return this.http.get(`http://localhost:8080/api/facturas/${id}/excel`, {
+    responseType: 'blob'
+  });
+}
+
 }

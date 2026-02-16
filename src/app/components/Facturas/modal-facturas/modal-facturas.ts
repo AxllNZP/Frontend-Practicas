@@ -23,9 +23,10 @@ export class ModalFacturasComponent implements OnInit {
   @Input() usuarios: UsuarioDto[] = [];
   @Input() productos: ProductoDto[] = [];
   @Input() monedas: MonedaDto[] = [];
+  @Input() guardando = false;
 
   @Output() close = new EventEmitter<void>();
-  @Output() facturaCreada = new EventEmitter<void>();
+  @Output() facturaCreada = new EventEmitter<FacturaRequestDTO>();
 
   serie = 'F001';
   observaciones = '';
@@ -39,7 +40,6 @@ export class ModalFacturasComponent implements OnInit {
   esVendedor: boolean = false;
 
   constructor(
-    private facturaService: FacturaService,
     public authService: AuthService
   ) {}
 
@@ -100,47 +100,33 @@ export class ModalFacturasComponent implements OnInit {
   }
 
   guardarFactura() {
-    if (!this.validar()) {
-      alert('Complete los campos obligatorios');
-      return;
-    }
-
-    // 🔥 Sincronizar pagos con la factura
-    const pagosSincronizados = this.pagos.map(p => ({
-      ...p,
-      idMoneda: this.idMoneda,
-      idUsuario: this.idUsuario
-    }));
-
-    const payload: FacturaRequestDTO = {
-      serie: this.serie,
-      observaciones: this.observaciones,
-      idCliente: this.idCliente,
-      idUsuario: this.idUsuario,
-      idMoneda: this.idMoneda,
-      detalles: this.detalles,
-      pagos: pagosSincronizados
-    };
-
-    console.log("📤 PAYLOAD A ENVIAR:", JSON.stringify(payload, null, 2));
-
-    this.facturaService.crear(payload).subscribe({
-      next: () => {
-        alert('✅ Factura creada correctamente');
-        this.facturaCreada.emit();
-        this.cerrar();
-      },
-      error: err => {
-        console.error('========== ERROR COMPLETO ==========');
-        console.error(err);
-        console.error('========== BODY ERROR ==========');
-        console.error(err.error);
-        console.error('========== STATUS ==========');
-        console.error(err.status);
-        alert('❌ Error: ' + (err.error?.message || err.message));
-      }
-    });
+  if (!this.validar()) {
+    alert('⚠️ Complete los campos obligatorios:\n\n- Serie\n- Cliente\n- Al menos un producto con cantidad válida');
+    return;
   }
+
+  // 🔥 Sincronizar pagos con la factura
+  const pagosSincronizados = this.pagos.map(p => ({
+    ...p,
+    idMoneda: this.idMoneda,
+    idUsuario: this.idUsuario
+  }));
+
+  const payload: FacturaRequestDTO = {
+    serie: this.serie,
+    observaciones: this.observaciones,
+    idCliente: this.idCliente,
+    idUsuario: this.idUsuario,
+    idMoneda: this.idMoneda,
+    detalles: this.detalles,
+    pagos: pagosSincronizados
+  };
+
+  console.log("📤 PAYLOAD A ENVIAR:", JSON.stringify(payload, null, 2));
+
+  // 🆕 Emitimos el payload al padre para que él maneje el guardado
+  this.facturaCreada.emit(payload);
+}
 
   private validar(): boolean {
     if (

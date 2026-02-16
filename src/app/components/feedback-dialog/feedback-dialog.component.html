@@ -1,0 +1,27 @@
+<div class="dialog-container" [ngClass]="data.tipo">
+
+  <div class="icon">
+    <span *ngIf="data.tipo === 'success'">✔</span>
+    <span *ngIf="data.tipo === 'error'">✖</span>
+    <span *ngIf="data.tipo === 'confirm'">⚠</span>
+    <span *ngIf="data.tipo === 'info'">ℹ</span>
+  </div>
+
+  <h2>{{ data.titulo }}</h2>
+
+  <p>{{ data.mensaje }}</p>
+
+  <div class="actions">
+    <button *ngIf="data.tipo === 'confirm'" 
+            class="btn-cancelar"
+            (click)="cerrar(false)">
+      Cancelar
+    </button>
+
+    <button class="btn-aceptar"
+            (click)="cerrar(true)">
+      {{ data.tipo === 'confirm' ? 'Confirmar' : 'Aceptar' }}
+    </button>
+  </div>
+
+</div>

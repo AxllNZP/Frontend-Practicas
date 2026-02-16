@@ -15,6 +15,7 @@ export class ProductoModalComponent {
   @Input() mostrar = false;
   @Input() modoEdicion = false;
   @Input() producto: Partial<ProductoDto> = {};
+  @Input() guardando = false;
 
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<Partial<ProductoDto>>();

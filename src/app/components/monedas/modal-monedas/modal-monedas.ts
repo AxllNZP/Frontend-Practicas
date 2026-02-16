@@ -21,6 +21,7 @@ export class ModalMonedaComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() modoEdicion = false;
   @Input() monedaEditar?: MonedaDto;
+  @Input() guardando = false;
 
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<{
@@ -52,24 +53,23 @@ export class ModalMonedaComponent implements OnChanges {
   }
 
   guardarMoneda(): void {
-    if (!this.nombre.trim() || !this.simbolo.trim() || !this.codigo.trim()) {
-      alert('⚠️ Complete todos los campos');
-      return;
-    }
-
-    const payload: any = {
-      nombre: this.nombre.trim(),
-      simbolo: this.simbolo.trim(),
-      codigo: this.codigo.trim().toUpperCase()
-    };
-
-    if (this.modoEdicion && this.monedaEditar?.idMoneda) {
-      payload.idMoneda = this.monedaEditar.idMoneda;
-    }
-
-    this.guardar.emit(payload);
-    this.limpiar();
+  if (!this.nombre.trim() || !this.simbolo.trim() || !this.codigo.trim()) {
+    return;
   }
+
+  const payload: any = {
+    nombre: this.nombre.trim(),
+    simbolo: this.simbolo.trim(),
+    codigo: this.codigo.trim().toUpperCase()
+  };
+
+  if (this.modoEdicion && this.monedaEditar?.idMoneda) {
+    payload.idMoneda = this.monedaEditar.idMoneda;
+  }
+
+  this.guardar.emit(payload);
+  this.limpiar();
+}
 
   onContentClick(event: Event): void {
     event.stopPropagation();

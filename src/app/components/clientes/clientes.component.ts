@@ -6,7 +6,9 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ClienteService, ClienteDto } from '../../services/cliente.service';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, firstValueFrom } from 'rxjs'; // 👈 Agrega firstValueFrom
+import { MatDialog } from '@angular/material/dialog';
+import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
 
 // 🔥 MODAL SEPARADO
 import { ModalClienteComponent } from './modal-clientes/modal-clientes';
@@ -23,6 +25,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
   clientes: ClienteDto[] = [];
   lastUpdated: Date | null = null;
   cargando = false;
+  guardando = false;
 
   mostrarModal = false;
   modoEdicion = false;
@@ -33,7 +36,8 @@ export class ClientesComponent implements OnInit, OnDestroy {
 
   constructor(
     private clienteService: ClienteService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -119,34 +123,54 @@ export class ClientesComponent implements OnInit, OnDestroy {
     this.startPolling();
   }
 
-  onModalGuardar(payload: Partial<ClienteDto>): void {
-    this.stopPolling();
+  async onModalGuardar(payload: Partial<ClienteDto>): Promise<void> {
+  if (this.guardando) return;
 
+  this.guardando = true;
+  this.cdr.detectChanges();
+
+  try {
     if (this.modoEdicion && this.clienteParaEditar?.idCliente) {
-      this.clienteService.actualizar(this.clienteParaEditar.idCliente, payload)
-        .subscribe({
-          next: () => {
-            alert('✅ Cliente actualizado');
-            this.finalizar();
-          },
-          error: () => {
-            alert('❌ Error al actualizar');
-            this.startPolling();
-          }
-        });
-    } else {
-      this.clienteService.crear(payload).subscribe({
-        next: () => {
-          alert('✅ Cliente creado');
-          this.finalizar();
-        },
-        error: () => {
-          alert('❌ Error al crear');
-          this.startPolling();
-        }
+      // EDICIÓN
+      await firstValueFrom(
+        this.clienteService.actualizar(this.clienteParaEditar.idCliente, payload)
+      );
+
+      await this.mostrarDialogo({
+        tipo: 'success',
+        titulo: '✅ Cliente Actualizado',
+        mensaje: `El cliente "${payload.nombreRazonSocial}" se actualizó correctamente`
       });
+      this.cargarClientes();
+      this.startPolling();
+
+    } else {
+      // CREACIÓN
+      await firstValueFrom(this.clienteService.crear(payload));
+
+      await this.mostrarDialogo({
+        tipo: 'success',
+        titulo: '✅ Cliente Creado',
+        mensaje: `El cliente "${payload.nombreRazonSocial}" se creó exitosamente`
+      });
+      this.cargarClientes();
+      this.startPolling();
+
     }
+
+    this.finalizar();
+
+  } catch (error) {
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Guardar',
+      mensaje: 'Ocurrió un error al guardar el cliente. Por favor, intenta nuevamente.'
+    });
+  } finally {
+    this.guardando = false;
+    this.cdr.detectChanges();
   }
+}
 
   private finalizar(): void {
     this.mostrarModal = false;
@@ -156,14 +180,37 @@ export class ClientesComponent implements OnInit, OnDestroy {
     this.startPolling();
   }
 
-  confirmarEliminar(cliente: ClienteDto): void {
-    if (!confirm(`¿Eliminar ${cliente.nombreRazonSocial}?`)) return;
+  async confirmarEliminar(cliente: ClienteDto): Promise<void> {
+  const confirmado = await this.mostrarDialogo({
+    tipo: 'confirm',
+    titulo: '⚠️ Confirmar Eliminación',
+    mensaje: `¿Estás seguro de eliminar el cliente?\n\n${cliente.nombreRazonSocial}\n\nEsta acción no se puede deshacer.`
+  });
 
-    this.clienteService.eliminar(cliente.idCliente).subscribe(() => {
-      alert('🗑️ Cliente eliminado');
-      this.cargarClientes();
+  if (!confirmado) return;
+
+  try {
+    await firstValueFrom(this.clienteService.eliminar(cliente.idCliente));
+
+    await this.mostrarDialogo({
+      tipo: 'success',
+      titulo: '🗑️ Cliente Eliminado',
+      mensaje: `El cliente "${cliente.nombreRazonSocial}" fue eliminado correctamente`
+      
     });
+
+    this.cargarClientes();
+    this.startPolling();
+
+  } catch (error) {
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Eliminar',
+      mensaje: 'No se pudo eliminar el cliente. Intenta nuevamente'
+    });
+    this.cargarClientes();
   }
+}
 
   // =========================
   // UTILIDADES
@@ -176,4 +223,25 @@ export class ClientesComponent implements OnInit, OnDestroy {
   getEstadoClass(estado: string): string {
     return estado === 'activo' ? 'estado-activo' : 'estado-inactivo';
   }
+
+
+
+  // =========================
+// DIÁLOGOS
+// =========================
+
+private async mostrarDialogo(data: FeedbackDialogData): Promise<boolean> {
+  const dialogRef = this.dialog.open(FeedbackDialogComponent, {
+    width: '400px',
+    disableClose: true,
+    data: data
+  });
+
+  const resultado = await firstValueFrom(dialogRef.afterClosed());
+  return resultado === true;
+}
+
+// =========================
+// UTILIDADES
+// =========================
 }

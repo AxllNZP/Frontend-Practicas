@@ -3,8 +3,11 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProductoService, ProductoDto, EstadoGeneral } from '../../services/producto.service';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, firstValueFrom } from 'rxjs';
 import { ProductoModalComponent } from './modal-productos/modal-productos';
+import { MatDialog } from '@angular/material/dialog';
+import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
+
 
 @Component({
   selector: 'app-productos',
@@ -18,6 +21,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
   productos: ProductoDto[] = [];
   lastUpdated: Date | null = null;
   cargando = false;
+  guardando = false;
 
   mostrarModal = false;
   modoEdicion = false;
@@ -28,7 +32,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   constructor(
     private productoService: ProductoService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -104,40 +109,120 @@ export class ProductosComponent implements OnInit, OnDestroy {
     this.startPolling();
   }
 
-  guardarProducto(producto: Partial<ProductoDto>): void {
-    this.productoSeleccionado = { ...this.productoSeleccionado, ...producto };
-    if (!this.productoSeleccionado.codigo || !this.productoSeleccionado.nombre) {
-      alert('Código y nombre son obligatorios');
-      return;
-    }
-
-    const payload = {
-      codigo: this.productoSeleccionado.codigo,
-      nombre: this.productoSeleccionado.nombre,
-      descripcion: this.productoSeleccionado.descripcion,
-      precio: this.productoSeleccionado.precio,
-      stock: this.productoSeleccionado.stock,
-      estado: this.productoSeleccionado.estado as EstadoGeneral
-    };
-
-    if (this.modoEdicion && this.productoSeleccionado.idProducto) {
-      this.productoService.actualizar(this.productoSeleccionado.idProducto, payload)
-        .subscribe(() => this.finalizarOperacion());
-    } else {
-      this.productoService.crear(payload)
-        .subscribe(() => this.finalizarOperacion());
-    }
+  async guardarProducto(producto: Partial<ProductoDto>): Promise<void> {
+  // Evitar múltiples guardados simultáneos
+  if (this.guardando) return;
+  
+  this.productoSeleccionado = { ...this.productoSeleccionado, ...producto };
+  
+  // ❌ Validación con diálogo de error
+  if (!this.productoSeleccionado.codigo || !this.productoSeleccionado.nombre) {
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Campos Incompletos',
+      mensaje: 'El código y el nombre son obligatorios para continuar'
+    });
+    return;
   }
+
+  const payload = {
+    codigo: this.productoSeleccionado.codigo,
+    nombre: this.productoSeleccionado.nombre,
+    descripcion: this.productoSeleccionado.descripcion,
+    precio: this.productoSeleccionado.precio,
+    stock: this.productoSeleccionado.stock,
+    estado: this.productoSeleccionado.estado as EstadoGeneral
+  };
+
+  // 🔒 Activamos el estado de guardando
+  this.guardando = true;
+  this.cdr.detectChanges(); // 🆕 Forzamos la detección inmediata
+
+  try {
+    if (this.modoEdicion && this.productoSeleccionado.idProducto) {
+      // EDICIÓN
+      await firstValueFrom(
+        this.productoService.actualizar(this.productoSeleccionado.idProducto, payload)
+      );
+      
+      await this.mostrarDialogo({
+        tipo: 'success',
+        titulo: '✅ Producto Actualizado',
+        mensaje: `El producto "${payload.nombre}" se actualizó correctamente (refresque la lista para verlo)`
+      });
+      this.cargarProductos(); // Refrescamos la lista después de editar
+      
+    } else {
+      // CREACIÓN
+      await firstValueFrom(this.productoService.crear(payload));
+      
+      await this.mostrarDialogo({
+        tipo: 'success',
+        titulo: '✅ Producto Creado',
+        mensaje: `El producto "${payload.nombre}" se creó exitosamente (refresque la lista para verlo)`
+      });
+      this.cargarProductos(); // Refrescamos la lista después de crear
+    }
+    
+    this.finalizarOperacion();
+    
+  } catch (error) {
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Guardar',
+      mensaje: 'Ocurrió un error al guardar el producto. Por favor, intenta nuevamente.'
+    });
+  } finally {
+    // 🔓 Desactivamos el estado de guardando
+    this.guardando = false;
+    this.cdr.detectChanges(); // 🆕 Forzamos la detección de nuevo
+  }
+}
 
   private finalizarOperacion(): void {
     this.cerrarModal();
     this.cargarProductos();
   }
 
-  confirmarEliminar(p: ProductoDto): void {
-    if (!confirm(`¿Eliminar producto?\n\n${p.nombre} - S/ ${p.precio}`)) return;
-    this.productoService.eliminar(p.idProducto).subscribe(() => this.cargarProductos());
+
+  private async mostrarDialogo(data: FeedbackDialogData): Promise<boolean> {
+  const dialogRef = this.dialog.open(FeedbackDialogComponent, {
+    width: '400px',
+    disableClose: true,
+    data: data
+  });
+
+  const resultado = await firstValueFrom(dialogRef.afterClosed());
+  return resultado === true;
+}
+
+  async confirmarEliminar(p: ProductoDto): Promise<void> {
+  const confirmado = await this.mostrarDialogo({
+    tipo: 'confirm',
+    titulo: '⚠️ Confirmar Eliminación',
+    mensaje: `¿Estás seguro de eliminar el producto?\n\n${p.nombre} - S/ ${p.precio}\n\nEsta acción no se puede deshacer.`
+  });
+
+  if (!confirmado) return;
+
+  try {
+    await firstValueFrom(this.productoService.eliminar(p.idProducto));
+    
+    await this.mostrarDialogo({
+      tipo: 'success',
+      titulo: '🗑️ Producto Eliminado',
+      mensaje: `El producto "${p.nombre}" fue eliminado correctamente`
+    });
+    
+    this.cargarProductos();
+  } catch (error) {
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Eliminar',
+      mensaje: 'No se pudo eliminar el producto. Intenta nuevamente'
+    });
   }
+}
 
   getEstadoClass(e: EstadoGeneral): string {
     return e === 'activo' ? 'estado-activo' : 'estado-inactivo';

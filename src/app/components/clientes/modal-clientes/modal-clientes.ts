@@ -21,6 +21,7 @@ export class ModalClienteComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() modoEdicion = false;
   @Input() clienteEditar?: ClienteDto;
+  @Input() guardando = false;
 
   @Output() cerrar = new EventEmitter<void>();
   @Output() guardar = new EventEmitter<Partial<ClienteDto>>();
@@ -40,23 +41,22 @@ export class ModalClienteComponent implements OnChanges {
   }
 
   guardarCliente(): void {
-    if (!this.cliente.tipoDocumento ||
-        !this.cliente.numeroDocumento ||
-        !this.cliente.nombreRazonSocial) {
-      alert('⚠️ Complete los campos obligatorios');
-      return;
-    }
+  if (!this.cliente.tipoDocumento ||
+      !this.cliente.numeroDocumento ||
+      !this.cliente.nombreRazonSocial) {
 
-    this.guardar.emit({
-      tipoDocumento: this.cliente.tipoDocumento,
-      numeroDocumento: this.cliente.numeroDocumento,
-      nombreRazonSocial: this.cliente.nombreRazonSocial,
-      direccion: this.cliente.direccion,
-      telefono: this.cliente.telefono,
-      email: this.cliente.email,
-      estado: this.cliente.estado
-    });
   }
+
+  this.guardar.emit({
+    tipoDocumento: this.cliente.tipoDocumento,
+    numeroDocumento: this.cliente.numeroDocumento,
+    nombreRazonSocial: this.cliente.nombreRazonSocial,
+    direccion: this.cliente.direccion,
+    telefono: this.cliente.telefono,
+    email: this.cliente.email,
+    estado: this.cliente.estado
+  });
+}
 
   onContentClick(event: Event): void {
     event.stopPropagation();

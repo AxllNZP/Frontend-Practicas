@@ -59,7 +59,11 @@
             </span>
           </td>
           <td>{{ f.nombreUsuario }}</td>
-          <td><button class="btn-descargar">📄Descargar</button></td>
+          <td class="acciones">
+                <button (click)="descargarPdf(f.idFactura)">📄 PDF</button>
+                <button (click)="descargarExcel(f.idFactura)">📊 Excel</button>
+          </td>
+
         </tr>
 
         <tr *ngIf="facturas.length === 0 && !cargando">
@@ -83,6 +87,7 @@
   [usuarios]="usuarios"
   [productos]="productos"
   [monedas]="monedas"
+  [guardando]="guardando"
   (close)="cerrarModal()"
-  (facturaCreada)="onFacturaCreada()">
+  (facturaCreada)="onFacturaCreada($event)">
 </app-modal-facturas>

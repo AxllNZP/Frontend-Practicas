@@ -43,10 +43,17 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="onCerrar()">Cancelar</button>
-      <button class="btn-guardar" (click)="onGuardar()">
-        {{ modoEdicion ? 'Actualizar' : 'Guardar' }}
-      </button>
-    </div>
+  <button class="btn-cancelar" 
+          (click)="onCerrar()"
+          [disabled]="guardando">
+    Cancelar
+  </button>
+  
+  <button class="btn-guardar" 
+          (click)="onGuardar()"
+          [disabled]="guardando">
+    {{ guardando ? '⏳ Guardando...' : (modoEdicion ? 'Actualizar' : 'Guardar') }}
+  </button>
+</div>
   </div>
 </div>

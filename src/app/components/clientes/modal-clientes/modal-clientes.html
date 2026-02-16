@@ -47,9 +47,18 @@
     </div>
 
     <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrarModal()">Cancelar</button>
-      <button class="btn-guardar" (click)="guardarCliente()">Guardar</button>
-    </div>
+  <button class="btn-cancelar" 
+          (click)="cerrarModal()"
+          [disabled]="guardando">
+    Cancelar
+  </button>
+  
+  <button class="btn-guardar" 
+          (click)="guardarCliente()"
+          [disabled]="guardando">
+    {{ guardando ? '⏳ Guardando...' : 'Guardar' }}
+  </button>
+</div>
 
   </div>
 </div>

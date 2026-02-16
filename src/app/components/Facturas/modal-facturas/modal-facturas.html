@@ -183,12 +183,19 @@
     </div>
 
     <!-- FOOTER -->
-    <div class="modal-footer">
-      <button class="btn-cancelar" (click)="cerrar()">Cancelar</button>
-      <button class="btn-guardar" (click)="guardarFactura()">
-        💾 Crear Factura
-      </button>
-    </div>
+<div class="modal-footer">
+  <button class="btn-cancelar" 
+          (click)="cerrar()"
+          [disabled]="guardando">
+    Cancelar
+  </button>
+  
+  <button class="btn-guardar" 
+          (click)="guardarFactura()"
+          [disabled]="guardando">
+    {{ guardando ? '⏳ Creando...' : '💾 Crear Factura' }}
+  </button>
+</div>
 
   </div>
 </div>
