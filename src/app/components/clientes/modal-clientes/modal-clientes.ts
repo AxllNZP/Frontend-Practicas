@@ -65,4 +65,38 @@ export class ModalClienteComponent implements OnChanges {
   getTitulo(): string {
     return this.modoEdicion ? '✏️ Editar Cliente' : '➕ Nuevo Cliente';
   }
+
+  getMaxLength(): number {
+  switch (this.cliente.tipoDocumento) {
+    case 'DNI': return 8;
+    case 'RUC': return 11;
+    case 'CE': return 12;
+    case 'PASAPORTE': return 12;
+    default: return 20;
+  }
+}
+
+esSoloNumeros(): boolean {
+  return this.cliente.tipoDocumento === 'DNI' ||
+         this.cliente.tipoDocumento === 'RUC';
+}
+
+
+onNumeroDocumentoInput(event: any) {
+  let valor = event.target.value;
+
+  // Si es DNI o RUC → solo números
+  if (this.esSoloNumeros()) {
+    valor = valor.replace(/[^0-9]/g, '');
+  }
+
+  // Limitar longitud
+  const max = this.getMaxLength();
+  if (valor.length > max) {
+    valor = valor.substring(0, max);
+  }
+
+  this.cliente.numeroDocumento = valor;
+}
+
 }

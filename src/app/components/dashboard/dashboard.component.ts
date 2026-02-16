@@ -38,8 +38,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
       console.log('👤 Usuario actual:', user);
       console.log('🎭 Rol actual:', user?.rol);
-      console.log('👑 Es admin?:', this.isAdmin());
-      console.log('💼 Es vendedor?:', this.isVendedor());
     });
   }
 
@@ -56,13 +54,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
   }
 
-  isAdmin(): boolean {
-    return this.authService.isAdmin();
-  }
 
-  isVendedor(): boolean {
-    return this.authService.hasRole(RolUsuario.VENDEDOR);
-  }
 
   getInitials(): string {
     if (!this.currentUser?.nombreCompleto) return '?';

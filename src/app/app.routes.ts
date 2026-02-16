@@ -69,20 +69,19 @@ export const routes: Routes = [
         component: ProductosComponent,
         canActivate: [authGuard]
       },
-
-      // 🔒 USUARIOS: SOLO ADMIN
-      { 
-        path: 'usuarios', 
+      
+      {
+        path: 'usuarios',
         component: UsuariosComponent,
-        canActivate: [authGuard, adminGuard]
+        canActivate: [authGuard]
       },
 
-      // 🔒 MONEDAS: SOLO ADMIN
-      { 
-        path: 'monedas', 
+      {
+        path: 'monedas',
         component: MonedasComponent,
-        canActivate: [authGuard, adminGuard]
+        canActivate: [authGuard]
       }
+
     ]
   },
 

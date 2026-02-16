@@ -34,10 +34,10 @@
             </select>
           </div>
 
-          <!-- 🔥 MOSTRAR SOLO SI ES ADMIN -->
-          <div class="form-group" *ngIf="mostrarSelectUsuario">
+
+          <div class="form-group">
             <label>Usuario *</label>
-            <select [(ngModel)]="idUsuario"  class="form-control">
+            <select [(ngModel)]="idUsuario"name="idUsuario" [disabled]="esVendedor"  class="form-control">
               <option value="0">-- Seleccione --</option>
               <option *ngFor="let u of usuarios" [value]="u.idUsuario">
                 {{ u.nombreCompleto }} ({{ u.nombreUsuario }})
@@ -45,18 +45,10 @@
             </select>
           </div>
 
-          <!-- 🔥 MOSTRAR AVISO SI ES VENDEDOR -->
-          <div class="form-group" *ngIf="!mostrarSelectUsuario">
-            <label>Usuario *</label>
-            <input
-              type="text"
-              [value]="'Tu usuario (auto-asignado)'"
-              class="form-control"
-              disabled>
-          </div>
+
 
           <!-- 🔥 MOSTRAR SOLO SI ES ADMIN -->
-          <div class="form-group" *ngIf="mostrarSelectMoneda">
+          <div class="form-group">
             <label>Moneda *</label>
             <select [(ngModel)]="idMoneda" class="form-control">
               <option value="0">Seleccione moneda</option>
@@ -66,15 +58,6 @@
             </select>
           </div>
 
-          <!-- 🔥 MOSTRAR AVISO SI ES VENDEDOR -->
-          <div class="form-group" *ngIf="!mostrarSelectMoneda">
-            <label>Moneda *</label>
-            <input
-              type="text"
-              value="Soles Peruanos (PEN)"
-              class="form-control"
-              disabled>
-          </div>
 
           <div class="form-group full-width">
             <label>Observaciones</label>

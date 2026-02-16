@@ -53,16 +53,8 @@ export class FacturasComponent implements OnInit, OnDestroy {
     this.cargarClientes();
     
     // 🔥 Verificar si es vendedor antes de cargar datos
-    const currentUser = this.authService.getCurrentUser();
-    const esVendedor = currentUser?.rol === RolUsuario.VENDEDOR;
-    
-    if (esVendedor) {
-      console.log('👤 Usuario es VENDEDOR - Cargando solo productos');
-      this.cargarDatosParaVendedor();
-    } else {
-      console.log('👑 Usuario es ADMIN - Cargando todos los datos');
-      this.cargarDatosEsenciales();
-    }
+    console.log('🔄 Cargando datos esenciales para todos los roles');
+    this.cargarDatosEsenciales();
     
     this.startPolling();
     document.addEventListener('visibilitychange', this.handleVisibilityChange);
@@ -73,29 +65,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
     document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
 
-  // ==========================================
-  // 🔥 CARGA DE DATOS PARA VENDEDORES
-  // ==========================================
-  private cargarDatosParaVendedor(): void {
-    console.log('🔄 Cargando solo productos para vendedor...');
-    
-    // Solo cargar productos (los vendedores SÍ pueden ver productos)
-    this.productoService.listar().subscribe({
-      next: data => {
-        this.productos = data.filter(p => p.estado === 'activo' && p.stock > 0);
-        console.log('✓ Productos cargados:', this.productos.length);
-        
-        // Marcar como cargado (usuarios y monedas se manejan en el modal)
-        this.datosEsencialesCargados = true;
-        console.log('✅ Datos para vendedor listos');
-      },
-      error: err => {
-        console.error('❌ Error al cargar productos:', err);
-        // Permitir continuar aunque falle
-        this.datosEsencialesCargados = true;
-      }
-    });
-  }
+
 
   // ==========================================
   // 🔥 CARGA DE DATOS PARA ADMINISTRADORES

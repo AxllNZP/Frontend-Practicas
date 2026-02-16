@@ -39,6 +39,7 @@
           <th>Pagado</th>
           <th>Saldo</th>
           <th>Usuario</th>
+          <th>Descargar</th>
         </tr>
       </thead>
       <tbody>
@@ -58,6 +59,7 @@
             </span>
           </td>
           <td>{{ f.nombreUsuario }}</td>
+          <td><button class="btn-descargar">📄Descargar</button></td>
         </tr>
 
         <tr *ngIf="facturas.length === 0 && !cargando">

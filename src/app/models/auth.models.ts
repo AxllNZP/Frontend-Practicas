@@ -9,7 +9,8 @@
  */
 export enum RolUsuario {
   ADMIN = 'admin',
-  VENDEDOR = 'vendedor'
+  VENDEDOR = 'vendedor',
+  CONTADOR = 'contador'
 }
 
 /**

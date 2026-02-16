@@ -308,12 +308,6 @@ export class AuthService {
     // Comparación case-insensitive
     const hasRole = user.rol.toLowerCase() === rol.toLowerCase();
     
-    console.log(`🔍 Verificando rol "${rol}":`, {
-      usuarioActual: user.nombreUsuario,
-      rolActual: user.rol,
-      rolBuscado: rol,
-      tieneRol: hasRole
-    });
     
     return hasRole;
   }

@@ -36,10 +36,7 @@ export class ModalFacturasComponent implements OnInit {
   detalles: DetalleFacturaDTO[] = [];
   pagos: PagoDTO[] = [];
 
-  // 🔥 NUEVAS PROPIEDADES para control de roles
-  esVendedor = false;
-  mostrarSelectUsuario = true;
-  mostrarSelectMoneda = true;
+  esVendedor: boolean = false;
 
   constructor(
     private facturaService: FacturaService,
@@ -47,54 +44,33 @@ export class ModalFacturasComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    console.log('=== MODAL FACTURAS INICIADO ===');
-    
-    const currentUser = this.authService.getCurrentUser();
-    console.log('🔑 Usuario actual:', currentUser);
+  console.log('=== MODAL FACTURAS INICIADO ===');
 
-    // 🔥 DETECTAR ROL
-    this.esVendedor = currentUser?.rol === RolUsuario.VENDEDOR;
-    console.log('📋 Es vendedor:', this.esVendedor);
+  const currentUser = this.authService.getCurrentUser();
+  console.log('🔑 Usuario actual:', currentUser);
 
-    if (this.esVendedor) {
-      // ==========================================
-      // 👤 LÓGICA PARA VENDEDORES
-      // ==========================================
-      console.log('👤 Configurando modal para VENDEDOR');
+  this.esVendedor = currentUser?.rol === 'vendedor';
 
-      // Auto-asignar su propio usuario
-      this.idUsuario = currentUser!.idUsuario!;
-      this.mostrarSelectUsuario = false;
-      console.log('✓ Usuario auto-asignado:', this.idUsuario);
-
-      // Moneda predeterminada: Soles Peruanos (asumiendo que idMoneda=1 es PEN)
-      // Puedes ajustar esto según tu base de datos
-      this.idMoneda = 1; // 1 = Soles, ajusta según tu BD
-      this.mostrarSelectMoneda = false;
-      console.log('✓ Moneda predeterminada (PEN):', this.idMoneda);
-
-    } else {
-      // ==========================================
-      // 👑 LÓGICA PARA ADMINISTRADORES
-      // ==========================================
-      console.log('👑 Configurando modal para ADMINISTRADOR');
-      console.log('👥 Usuarios disponibles:', this.usuarios.length);
-      console.log('💰 Monedas disponibles:', this.monedas.length);
-
-      // Mostrar selects normalmente
-      this.mostrarSelectUsuario = true;
-      this.mostrarSelectMoneda = true;
-
-      // Auto-seleccionar la primera moneda si hay
-      if (this.monedas.length > 0) {
-        this.idMoneda = this.monedas[0].idMoneda;
-        console.log('✓ Moneda auto-seleccionada:', this.idMoneda);
-      }
-    }
-
-    console.log('📦 Productos disponibles:', this.productos.length);
-    console.log('👤 Clientes disponibles:', this.clientes.length);
+  // ✅ Si es vendedor → autoasignar su usuario
+  if (this.esVendedor && currentUser && currentUser.idUsuario) {
+    this.idUsuario = currentUser.idUsuario;
+    console.log('✅ Usuario vendedor asignado automáticamente:', this.idUsuario);
   }
+  // ✅ Si NO es vendedor → seleccionar el primero por defecto
+  else if (this.usuarios.length > 0) {
+    this.idUsuario = this.usuarios[0].idUsuario;
+  }
+
+  // Moneda por defecto (para todos)
+  if (this.monedas.length > 0) {
+    this.idMoneda = this.monedas[0].idMoneda;
+  }
+
+  console.log('👥 Usuarios disponibles:', this.usuarios.length);
+  console.log('💰 Monedas disponibles:', this.monedas.length);
+}
+
+
 
   cerrar() {
     this.limpiarFormulario();
@@ -187,21 +163,23 @@ export class ModalFacturasComponent implements OnInit {
   }
 
   private limpiarFormulario() {
-    this.serie = 'F001';
-    this.observaciones = '';
-    this.idCliente = 0;
-    
-    // Restaurar valores por defecto según el rol
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser?.rol === RolUsuario.VENDEDOR) {
-      this.idUsuario = currentUser.idUsuario!;
-      this.idMoneda = 1;
-    } else {
-      this.idUsuario = 1;
-      this.idMoneda = 1;
-    }
-    
-    this.detalles = [];
-    this.pagos = [];
+  this.serie = 'F001';
+  this.observaciones = '';
+  this.idCliente = 0;
+
+  if (this.usuarios.length > 0) {
+    this.idUsuario = this.usuarios[0].idUsuario;
   }
+
+  if (this.monedas.length > 0) {
+    this.idMoneda = this.monedas[0].idMoneda;
+  }
+
+  this.detalles = [];
+  this.pagos = [];
+}
+
+
+
+
 }

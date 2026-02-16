@@ -11,7 +11,7 @@
     <div class="modal-body">
 
       <label>Tipo Documento</label>
-      <select [(ngModel)]="cliente.tipoDocumento">
+      <select [(ngModel)]="cliente.tipoDocumento" >
         <option value="DNI">DNI</option>
         <option value="RUC">RUC</option>
         <option value="CE">CE</option>
@@ -19,7 +19,12 @@
       </select>
 
       <label>N° Documento</label>
-      <input [(ngModel)]="cliente.numeroDocumento" placeholder="N° Documento">
+      <input
+        [(ngModel)]="cliente.numeroDocumento"
+        (input)="onNumeroDocumentoInput($event)"
+        [attr.maxlength]="getMaxLength()"
+        [attr.inputmode]="esSoloNumeros() ? 'numeric' : 'text'"
+        placeholder="N° Documento">
 
       <label>Nombre / Razón Social</label>
       <input [(ngModel)]="cliente.nombreRazonSocial" placeholder="Nombre o Razón Social">

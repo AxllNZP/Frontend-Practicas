@@ -8,7 +8,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
 
-export type RolUsuario = 'admin' | 'vendedor';
+export type RolUsuario = 'admin' | 'vendedor' | 'contador';
 export type EstadoGeneral = 'activo' | 'inactivo';
 
 export interface UsuarioDto {

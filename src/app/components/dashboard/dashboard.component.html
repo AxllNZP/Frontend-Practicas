@@ -26,7 +26,7 @@
 
         <!-- USUARIOS: SOLO ADMIN -->
         <a 
-          *ngIf="isAdmin()" 
+          *ngIf="currentUser?.rol === 'admin'"
           routerLink="/dashboard/usuarios" 
           routerLinkActive="active">
           Usuarios
@@ -34,7 +34,7 @@
 
         <!-- MONEDAS: SOLO ADMIN -->
         <a 
-          *ngIf="isAdmin()" 
+          *ngIf="currentUser?.rol === 'admin'"
           routerLink="/dashboard/monedas" 
           routerLinkActive="active">
           Monedas
@@ -55,9 +55,7 @@
             
             <!-- BADGE DEL ROL -->
             <span 
-              class="badge" 
-              [class.badge-admin]="isAdmin()"
-              [class.badge-vendedor]="isVendedor()">
+              class="badge">
               {{ currentUser.rol | uppercase }}
             </span>
           </div>
