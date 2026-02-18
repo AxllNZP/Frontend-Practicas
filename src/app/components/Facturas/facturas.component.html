@@ -1,86 +1,87 @@
-<!-- src/app/components/facturas/facturas.component.html -->
-<div class="container">
-  <div class="header">
-    <div class="header-content">
-      <h1>🧾 Gestión de Facturas</h1>
-      
-      <!-- 🔥 BOTÓN CON VALIDACIÓN -->
-      <button 
-        class="btn-crear" 
-        (click)="abrirModalCrear()"
-        [disabled]="!datosEsencialesCargados">
-        ➕ Nueva Factura
+<div class="main-container fade-in">
+
+  <!-- Header Section -->
+  <header class="page-header">
+    <div class="title-wrapper">
+      <div class="icon-box">🧾</div>
+      <div>
+        <h1>Gestión de Facturas</h1>
+        <p class="subtitle">Administra tus facturas de forma eficiente</p>
+      </div>
+    </div>
+
+    <div class="actions-wrapper">
+      <span *ngIf="lastUpdated" class="last-update">
+        <i class="fas fa-clock"></i> Actualizado: {{ lastUpdated | date:'medium' }}
+      </span>
+      <button class="btn-primary" (click)="abrirModalCrear()" [disabled]="!datosEsencialesCargados">
+        <span>➕</span> Nueva Factura
         <span *ngIf="!datosEsencialesCargados">⏳</span>
       </button>
     </div>
-    <p class="last-update">
-      Última actualización: 
-      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
-      <span *ngIf="!lastUpdated">Cargando...</span>
-    </p>
+  </header>
+
+  <!-- Loading State -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner"></div>
+    <p>⏳ Cargando facturas...</p>
   </div>
 
-  <div *ngIf="cargando" class="loading">
-    <span>⏳ Cargando facturas...</span>
+  <!-- Table Section -->
+  <div class="table-card" *ngIf="!cargando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th>Serie-Número</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Documento</th>
+            <th>Subtotal</th>
+            <th>IGV</th>
+            <th>Total</th>
+            <th>Pagado</th>
+            <th>Saldo</th>
+            <th>Usuario</th>
+            <th class="col-actions">Descargar</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let f of facturas">
+            <td class="text-muted">#{{ f.idFactura }}</td>
+            <td><strong>{{ f.serie }}-{{ f.numero }}</strong></td>
+            <td class="fecha">{{ formatearFecha(f.fechaEmision) }}</td>
+            <td class="nombre">{{ f.nombreCliente }}</td>
+            <td>{{ f.documentoCliente }}</td>
+            <td class="monto">{{ f.simboloMoneda }} {{ f.subtotal | number:'1.2-2' }}</td>
+            <td class="monto">{{ f.simboloMoneda }} {{ f.igv | number:'1.2-2' }}</td>
+            <td class="monto"><strong>{{ f.simboloMoneda }} {{ f.total | number:'1.2-2' }}</strong></td>
+            <td class="monto">{{ f.simboloMoneda }} {{ f.totalPagado | number:'1.2-2' }}</td>
+            <td>
+              <span class="status-chip" [ngClass]="getSaldoClass(f.saldoPendiente)">
+                {{ f.simboloMoneda }} {{ f.saldoPendiente | number:'1.2-2' }}
+              </span>
+            </td>
+            <td>{{ f.nombreUsuario }}</td>
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon pdf" (click)="descargarPdf(f.idFactura)" title="PDF">📄</button>
+                <button class="btn-icon excel" (click)="descargarExcel(f.idFactura)" title="Excel">📊</button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="facturas.length === 0" class="empty-state">
+            <td colspan="12">📭 No hay facturas registradas en el sistema</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Serie-Número</th>
-          <th>Fecha</th>
-          <th>Cliente</th>
-          <th>Documento</th>
-          <th>Subtotal</th>
-          <th>IGV</th>
-          <th>Total</th>
-          <th>Pagado</th>
-          <th>Saldo</th>
-          <th>Usuario</th>
-          <th>Descargar</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let f of facturas" class="factura-row">
-          <td>{{ f.idFactura }}</td>
-          <td><strong>{{ f.serie }}-{{ f.numero }}</strong></td>
-          <td class="fecha">{{ formatearFecha(f.fechaEmision) }}</td>
-          <td class="nombre">{{ f.nombreCliente }}</td>
-          <td>{{ f.documentoCliente }}</td>
-          <td class="monto">{{ f.simboloMoneda }} {{ f.subtotal | number:'1.2-2' }}</td>
-          <td class="monto">{{ f.simboloMoneda }} {{ f.igv | number:'1.2-2' }}</td>
-          <td class="monto"><strong>{{ f.simboloMoneda }} {{ f.total | number:'1.2-2' }}</strong></td>
-          <td class="monto">{{ f.simboloMoneda }} {{ f.totalPagado | number:'1.2-2' }}</td>
-          <td>
-            <span [class]="getSaldoClass(f.saldoPendiente)">
-              {{ f.simboloMoneda }} {{ f.saldoPendiente | number:'1.2-2' }}
-            </span>
-          </td>
-          <td>{{ f.nombreUsuario }}</td>
-          <td class="acciones">
-                <button (click)="descargarPdf(f.idFactura)">📄 PDF</button>
-                <button (click)="descargarExcel(f.idFactura)">📊 Excel</button>
-          </td>
-
-        </tr>
-
-        <tr *ngIf="facturas.length === 0 && !cargando">
-          <td colspan="11" class="no-data">
-            📭 No hay facturas registradas en el sistema
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <div class="footer">
-    <p>Total de facturas: <strong>{{ facturas.length }}</strong></p>
-  </div>
 </div>
 
-<!-- 🔥 MODAL - Se pasan los datos ya cargados -->
+<!-- Modal Facturas -->
 <app-modal-facturas
   *ngIf="mostrarModal"
   [clientes]="clientes"

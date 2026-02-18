@@ -1,166 +1,106 @@
-<!-- src/app/components/modal-usuario/modal-usuario.component.html -->
-
-<!--
-  📖 TEMPLATE DEL MODAL DE USUARIO
+<!-- modal-usuario.component.html -->
+<div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
   
-  Este es un componente reutilizable que puede ser usado para:
-  - Crear nuevos usuarios (modoEdicion = false)
-  - Editar usuarios existentes (modoEdicion = true)
-  
-  MEJORAS vs. versión inline:
-  ✅ Código más limpio y organizado
-  ✅ Fácil de mantener
-  ✅ Reutilizable en múltiples contextos
-  ✅ Separación clara de responsabilidades
--->
-
-<div 
-  class="modal-overlay" 
-  *ngIf="isOpen"
-  (click)="cerrarModal()">
-  
-  <div 
-    class="modal-content" 
-    (click)="onModalContentClick($event)">
+  <div class="modal-container" (click)="$event.stopPropagation()">
     
-    <!-- ========================================
-         HEADER DEL MODAL
-         ======================================== -->
+    <!-- HEADER -->
     <div class="modal-header">
-      <h2>{{ getTitulo() }}</h2>
-      <button 
-        class="btn-close" 
-        (click)="cerrarModal()"
-        type="button"
-        aria-label="Cerrar modal">
-        ✖
+      <div class="title-section">
+        <div class="icon-badge user-badge">
+          {{ modoEdicion ? '👤' : '👋' }}
+        </div>
+        <div>
+          <h2>{{ getTitulo() }}</h2>
+          <p class="subtitle">{{ modoEdicion ? 'Actualiza los datos de acceso' : 'Registra un nuevo miembro del equipo' }}</p>
+        </div>
+      </div>
+      <button class="btn-icon-close" (click)="cerrarModal()" title="Cerrar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
       </button>
     </div>
 
-    <!-- ========================================
-         BODY DEL MODAL - FORMULARIO
-         ======================================== -->
+    <!-- BODY -->
     <div class="modal-body">
       <div class="form-grid">
         
-        <!-- Campo: Nombre de Usuario -->
-        <div class="form-group">
-          <label for="nombreUsuario">
-            Usuario *
-          </label>
-          <input 
-            id="nombreUsuario"
-            type="text"
-            [(ngModel)]="nombreUsuario"
-            class="form-control"
-            placeholder="Ej: juan.perez"
-            [disabled]="modoEdicion"
-            autocomplete="username">
-          <small class="form-hint" *ngIf="modoEdicion">
-            El nombre de usuario no puede modificarse
-          </small>
-        </div>
-
-        <!-- Campo: Contraseña -->
-        <div class="form-group">
-          <label for="clave">
-            Contraseña *
-          </label>
-          <input 
-            id="clave"
-            type="password"
-            [(ngModel)]="clave"
-            class="form-control"
-            placeholder="••••••••"
-            autocomplete="new-password">
-          <small class="form-hint" *ngIf="modoEdicion">
-            Dejar en blanco para mantener la actual
-          </small>
-        </div>
-
-        <!-- Campo: Nombre Completo -->
+        <!-- Nombre Completo (Full Width) -->
         <div class="form-group full-width">
-          <label for="nombreCompleto">
-            Nombre Completo *
-          </label>
-          <input 
-            id="nombreCompleto"
-            type="text"
-            [(ngModel)]="nombreCompleto"
-            class="form-control"
-            placeholder="Ej: Juan Pérez García"
-            autocomplete="name">
+          <label for="nombreCompleto">Nombre Completo <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input id="nombreCompleto" type="text" class="form-input" 
+                   [(ngModel)]="nombreCompleto" placeholder="Ej: Juan Pérez García" autocomplete="name">
+          </div>
         </div>
 
-        <!-- Campo: Email -->
+        <!-- Usuario -->
+        <div class="form-group">
+          <label for="nombreUsuario">Usuario <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <span class="input-prefix">@</span>
+            <input id="nombreUsuario" type="text" class="form-input has-prefix" 
+                   [(ngModel)]="nombreUsuario" placeholder="juan.perez"
+                   [disabled]="modoEdicion" autocomplete="username">
+          </div>
+          <small class="helper-text" *ngIf="modoEdicion">No modificable</small>
+        </div>
+
+        <!-- Rol -->
+        <div class="form-group">
+          <label for="rol">Rol</label>
+          <div class="select-wrapper">
+            <select id="rol" class="form-select" [(ngModel)]="rol">
+              <option value="admin">👑 ADMIN</option>
+              <option value="vendedor">💼 VENDEDOR</option>
+            </select>
+          </div>
+          <small class="helper-text">Permisos del sistema</small>
+        </div>
+
+        <!-- Email (Full Width) -->
         <div class="form-group full-width">
-          <label for="email">
-            Email
-          </label>
-          <input 
-            id="email"
-            type="email"
-            [(ngModel)]="email"
-            class="form-control"
-            placeholder="Ej: juan.perez@empresa.com"
-            autocomplete="email">
-          <small class="form-hint">
-            Opcional
-          </small>
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <input id="email" type="email" class="form-input" 
+                   [(ngModel)]="email" placeholder="juan.perez@empresa.com" autocomplete="email">
+          </div>
+          <small class="helper-text">Opcional</small>
         </div>
 
-        <!-- Campo: Rol -->
+        <!-- Contraseña -->
         <div class="form-group">
-          <label for="rol">
-            Rol
-          </label>
-          <select 
-            id="rol"
-            [(ngModel)]="rol"
-            class="form-control">
-            <option value="admin">👑 ADMIN</option>
-            <option value="vendedor">💼 VENDEDOR</option>
-          </select>
-          <small class="form-hint">
-            Define los permisos del usuario
-          </small>
+          <label for="clave">Contraseña {{ modoEdicion ? '' : '*' }}</label>
+          <div class="input-wrapper">
+            <input id="clave" type="password" class="form-input" 
+                   [(ngModel)]="clave" placeholder="••••••••" autocomplete="new-password">
+          </div>
+          <small class="helper-text" *ngIf="modoEdicion">Dejar vacío para mantener actual</small>
         </div>
 
-        <!-- Campo: Estado -->
+        <!-- Estado -->
         <div class="form-group">
-          <label for="estado">
-            Estado *
-          </label>
-          <select 
-            id="estado"
-            [(ngModel)]="estado"
-            class="form-control">
-            <option value="activo">✅ Activo</option>
-            <option value="inactivo">⛔ Inactivo</option>
-          </select>
-          <small class="form-hint">
-            Usuarios inactivos no pueden acceder
-          </small>
+          <label for="estado">Estado <span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select id="estado" class="form-select" [(ngModel)]="estado">
+              <option value="activo">✅ Activo</option>
+              <option value="inactivo">⛔ Inactivo</option>
+            </select>
+          </div>
         </div>
         
       </div>
     </div>
 
-    <!-- ========================================
-         FOOTER DEL MODAL - BOTONES
-         ======================================== -->
+    <!-- FOOTER -->
     <div class="modal-footer">
-      <button 
-        class="btn-cancelar" 
-        (click)="cerrarModal()"
-        type="button">
+      <button class="btn-secondary" (click)="cerrarModal()" [disabled]="guardando">
         Cancelar
       </button>
-      <button 
-        class="btn-guardar" 
-        (click)="guardarUsuario()"
-        type="button">
-        {{ getTextoBotonGuardar() }}
+      
+      <button class="btn-primary" (click)="guardarUsuario()" [disabled]="guardando">
+        <span *ngIf="guardando" class="spinner-sm"></span>
+        {{ guardando ? 'Guardando...' : getTextoBotonGuardar() }}
       </button>
     </div>
 

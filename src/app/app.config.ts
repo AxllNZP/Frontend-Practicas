@@ -5,9 +5,10 @@
 
 import { ApplicationConfig, provideZoneChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient, withInterceptors } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { authInterceptor } from './interceptors/auth.interceptor';
+import { provideAnimations } from '@angular/platform-browser/animations';
 
 /**
  * CONFIGURACIÓN PRINCIPAL DE LA APLICACIÓN STANDALONE
@@ -19,9 +20,11 @@ export const appConfig: ApplicationConfig = {
   providers: [
     // Optimización de detección de cambios
     provideZoneChangeDetection({ eventCoalescing: true }),
+    provideHttpClient(withFetch()),  // ← SIN ESTO: todos tus HTTP calls fallan
     
     // Configuración del router con las rutas
     provideRouter(routes),
+    
     
     /**
      * CONFIGURACIÓN HTTP CLIENT CON INTERCEPTOR

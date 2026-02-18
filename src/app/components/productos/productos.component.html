@@ -1,52 +1,115 @@
-<div class="container">
-  <div class="header">
-    <div class="header-content">
-      <h1>📦 Gestión de Productos</h1>
-      <button class="btn-crear" (click)="abrirModalCrear()">➕ Nuevo Producto</button>
+<div class="main-container fade-in">
+
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="title-wrapper">
+      <div class="icon-box">📦</div>
+      <div>
+        <h1>Gestión de Productos</h1>
+        <p class="subtitle">Administra tu inventario de forma eficiente</p>
+      </div>
     </div>
-    <p class="last-update">
-      Última actualización:
-      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
-    </p>
+
+    <div class="actions-wrapper">
+      <div class="last-update" *ngIf="lastUpdated">
+        <i class="fas fa-clock"></i>
+        {{ lastUpdated | date:'shortTime' }}
+      </div>
+
+      <button class="btn-secondary" (click)="abrirModalReporte()">
+        📊 Reporte
+      </button>
+
+      <button class="btn-primary" (click)="abrirModalCrear()">
+        + Nuevo Producto
+      </button>
+    </div>
+  </header>
+
+  <!-- LOADING -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando inventario...</p>
   </div>
 
-  <div *ngIf="cargando" class="loading">⏳ Cargando productos...</div>
+  <!-- TABLA -->
+  <div class="table-card" *ngIf="!cargando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th>Código</th>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Stock</th>
+            <th>Estado</th>
+            <th>Fecha</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let p of productos">
+            <td class="text-muted">#{{ p.idProducto }}</td>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Descripción</th>
-          <th>Precio</th>
-          <th>Stock</th>
-          <th>Estado</th>
-          <th>Fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let p of productos">
-          <td>{{ p.idProducto }}</td>
-          <td><strong>{{ p.codigo }}</strong></td>
-          <td>{{ p.nombre }}</td>
-          <td>{{ p.descripcion || '—' }}</td>
-          <td>S/ {{ p.precio | number:'1.2-2' }}</td>
-          <td><span [class]="getStockClass(p.stock)">{{ p.stock }}</span></td>
-          <td><span [class]="getEstadoClass(p.estado)">{{ p.estado }}</span></td>
-          <td>{{ formatearFecha(p.fechaRegistro) }}</td>
-          <td class="acciones">
-            <button class="btn-editar" (click)="abrirModalEditar(p)">✏️</button>
-            <button class="btn-eliminar" (click)="confirmarEliminar(p)">🗑️</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td>
+              <span class="code-badge">{{ p.codigo }}</span>
+            </td>
+
+            <td>
+              <div class="entity-info">
+                <span class="entity-title">{{ p.nombre }}</span>
+                <span class="entity-subtitle" title="{{ p.descripcion }}">
+                  {{ p.descripcion || 'Sin descripción' }}
+                </span>
+              </div>
+            </td>
+
+            <td class="price">
+              S/ {{ p.precio | number:'1.2-2' }}
+            </td>
+
+            <td>
+              <span class="status-chip" [ngClass]="getStockClass(p.stock)">
+                <span class="dot"></span> {{ p.stock }}
+              </span>
+            </td>
+
+            <td>
+              <span class="status-chip" [ngClass]="getEstadoClass(p.estado)">
+                <span class="dot"></span> {{ p.estado }}
+              </span>
+            </td>
+
+            <td class="text-muted">
+              {{ formatearFecha(p.fechaRegistro) }}
+            </td>
+
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="abrirModalEditar(p)">✏️</button>
+                <button class="btn-icon delete" (click)="confirmarEliminar(p)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="productos.length === 0">
+            <td colspan="8" class="empty-state-row">
+              <div class="empty-content">
+                <div class="empty-icon">📭</div>
+                <p>No hay productos registrados</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
+
 </div>
 
+
+<!-- Tu modal se mantiene igual -->
 <app-producto-modal
   [mostrar]="mostrarModal"
   [modoEdicion]="modoEdicion"
@@ -55,3 +118,9 @@
   (cerrar)="cerrarModal()"
   (guardar)="guardarProducto($event)">
 </app-producto-modal>
+
+<app-modal-reporte-productos
+  [mostrar]="mostrarModalReporte"
+  (cerrar)="cerrarModalReporte()">
+</app-modal-reporte-productos>
+

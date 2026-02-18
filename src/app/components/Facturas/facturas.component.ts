@@ -40,7 +40,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
   mostrarModal = false;
 
   private pollingSub?: Subscription;
-  private readonly POLL_MS = 5000;
+  private readonly POLL_MS = 20000;
 
   constructor(
     private facturaService: FacturaService,
@@ -145,7 +145,7 @@ export class FacturasComponent implements OnInit, OnDestroy {
         this.facturas = [...data];
         this.lastUpdated = new Date();
         this.cargando = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: err => {
         console.error('✗ ERROR al cargar facturas:', err);

@@ -1,56 +1,118 @@
-<div class="container">
-
-  <div class="header">
-    <div class="header-content">
-      <h1>💱 Gestión de Monedas</h1>
-      <button class="btn-crear" (click)="abrirCrear()">➕ Nueva Moneda</button>
+<div class="main-container fade-in">
+  
+  <!-- ================================
+       HEADER
+       ================================ -->
+  <header class="page-header">
+    <div class="title-wrapper">
+      <div class="icon-box">💱</div>
+      <div>
+        <h1>Gestión de Monedas</h1>
+        <p class="subtitle">Configura las divisas disponibles</p>
+      </div>
     </div>
 
-    <p class="last-update">
-      Última actualización:
-      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
-      <span *ngIf="!lastUpdated">Cargando...</span>
-    </p>
+    <div class="actions-wrapper">
+      <!-- Última actualización -->
+      <p class="last-update">
+        Última actualización:
+        <span *ngIf="lastUpdated" class="update-badge">
+          <i class="fas fa-clock"></i> {{ lastUpdated | date:'shortTime' }}
+        </span>
+        <span *ngIf="!lastUpdated" class="update-badge">Cargando...</span>
+      </p>
+      
+      <!-- 
+        ✅ BOTÓN CORREGIDO 
+        Removemos el <span>+</span> y usamos el emoji directamente
+      -->
+      <button class="btn-primary" (click)="abrirCrear()" type="button">
+        ➕ Nueva Moneda
+      </button>
+    </div>
+  </header>
+
+  <!-- ================================
+       LOADING STATE
+       ================================ -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando divisas...</p>
   </div>
 
-  <div *ngIf="cargando" class="loading">
-    ⏳ Cargando monedas...
-  </div>
+  <!-- ================================
+       TABLA DE MONEDAS
+       ================================ -->
+  <div class="table-card" *ngIf="!cargando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th>Código ISO</th>
+            <th>Símbolo</th>
+            <th>Nombre</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of monedas">
+            <td class="text-muted">#{{ m.idMoneda }}</td>
+            
+            <!-- Código ISO destacado -->
+            <td>
+              <span class="currency-code">{{ m.codigo }}</span>
+            </td>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Nombre</th>
-          <th>Símbolo</th>
-          <th>Código</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
+            <!-- Símbolo visual -->
+            <td>
+              <div class="symbol-circle">{{ m.simbolo }}</div>
+            </td>
 
-      <tbody>
-        <tr *ngFor="let m of monedas">
-          <td>{{ m.idMoneda }}</td>
-          <td>{{ m.nombre }}</td>
-          <td>{{ m.simbolo }}</td>
-          <td><strong>{{ m.codigo }}</strong></td>
-          <td>
-            <button class="btn-editar" (click)="abrirEditar(m)">✏️</button>
-            <button class="btn-eliminar" (click)="eliminar(m)">🗑️</button>
-          </td>
-        </tr>
+            <!-- Nombre -->
+            <td class="font-medium text-main">{{ m.nombre }}</td>
 
-        <tr *ngIf="monedas.length === 0 && !cargando">
-          <td colspan="5" class="no-data">📭 No hay monedas registradas</td>
-        </tr>
-      </tbody>
-    </table>
+            <!-- Acciones -->
+            <td>
+              <div class="action-buttons">
+                <button 
+                  class="btn-icon edit" 
+                  (click)="abrirEditar(m)" 
+                  title="Editar"
+                  type="button">
+                  ✏️
+                </button>
+                <button 
+                  class="btn-icon delete" 
+                  (click)="eliminar(m)" 
+                  title="Eliminar"
+                  type="button">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- NO DATA STATE -->
+          <tr *ngIf="monedas.length === 0">
+            <td colspan="5" class="empty-state-row">
+              <div class="empty-content">
+                <div class="empty-icon">💱</div>
+                <p>No hay monedas registradas</p>
+                <small>Haz clic en "Nueva Moneda" para comenzar</small>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
 </div>
 
-
+<!-- ================================
+     MODAL DE MONEDA
+     ================================ -->
 <app-modal-moneda
   [isOpen]="mostrarModal"
   [modoEdicion]="modoEdicion"
@@ -59,4 +121,3 @@
   (cerrar)="onModalCerrar()"
   (guardar)="onModalGuardar($event)">
 </app-modal-moneda>
-

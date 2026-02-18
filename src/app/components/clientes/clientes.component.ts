@@ -9,6 +9,7 @@ import { ClienteService, ClienteDto } from '../../services/cliente.service';
 import { Subscription, interval, firstValueFrom } from 'rxjs'; // 👈 Agrega firstValueFrom
 import { MatDialog } from '@angular/material/dialog';
 import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
+import { ReporteFacturasComponent } from './reporte-facturas.component/reporte-facturas.component';
 
 // 🔥 MODAL SEPARADO
 import { ModalClienteComponent } from './modal-clientes/modal-clientes';
@@ -16,7 +17,7 @@ import { ModalClienteComponent } from './modal-clientes/modal-clientes';
 @Component({
   selector: 'app-clientes',                                                                                                                                                    
   standalone: true,
-  imports: [CommonModule, ModalClienteComponent],
+  imports: [CommonModule, ModalClienteComponent,ReporteFacturasComponent   ],
   templateUrl: './clientes.component.html',
   styleUrls: ['./clientes.component.css']
 })
@@ -26,13 +27,15 @@ export class ClientesComponent implements OnInit, OnDestroy {
   lastUpdated: Date | null = null;
   cargando = false;
   guardando = false;
+  mostrarReporte = false;
+
 
   mostrarModal = false;
   modoEdicion = false;
   clienteParaEditar?: ClienteDto;
 
   private pollingSub?: Subscription;
-  private readonly POLL_MS = 5000;
+  private readonly POLL_MS = 10000;
 
   constructor(
     private clienteService: ClienteService,
@@ -64,7 +67,7 @@ export class ClientesComponent implements OnInit, OnDestroy {
         this.clientes = [...data];
         this.lastUpdated = new Date();
         this.cargando = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: err => {
         console.error(err);
@@ -110,10 +113,10 @@ export class ClientesComponent implements OnInit, OnDestroy {
   }
 
   abrirModalEditar(cliente: ClienteDto): void {
-    this.stopPolling();
     this.modoEdicion = true;
     this.clienteParaEditar = { ...cliente };
     this.mostrarModal = true;
+    
   }
 
   onModalCerrar(): void {
@@ -241,7 +244,16 @@ private async mostrarDialogo(data: FeedbackDialogData): Promise<boolean> {
   return resultado === true;
 }
 
-// =========================
-// UTILIDADES
-// =========================
+//ABRIR REPORTE
+
+abrirReporte(): void {
+  this.stopPolling(); // detenemos polling mientras estamos en reporte
+  this.mostrarReporte = true;
+}
+
+cerrarReporte(): void {
+  this.mostrarReporte = false;
+  this.startPolling(); // reactivamos polling
+}
+
 }

@@ -1,134 +1,123 @@
-<!-- src/app/components/usuarios/usuarios.component.html - VERSIÓN SIMPLIFICADA -->
+<div class="main-container fade-in">
 
-<!--
-  📖 TEMPLATE DE USUARIOS - VERSIÓN MEJORADA
-  
-  CAMBIOS APLICADOS:
-  ✅ Se eliminaron las ~60 líneas del formulario inline
-  ✅ Se reemplazó con UNA SOLA ETIQUETA: <app-modal-usuario>
-  ✅ Código mucho más limpio y legible
-  ✅ Separación clara entre tabla y formulario
--->
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="title-wrapper">
+      <div class="icon-box">👤</div>
+      <div>
+        <h1>Gestión de Usuarios</h1>
+        <p class="subtitle">Administración de accesos y roles</p>
+      </div>
+    </div>
 
-<div class="container">
-  
-  <!-- ========================================
-       HEADER
-       ======================================== -->
-  <div class="header">
-    <div class="header-content">
-      <h1>👤 Gestión de Usuarios</h1>
-      <button class="btn-crear" (click)="abrirModalCrear()">
-        ➕ Nuevo Usuario
+    <div class="actions-wrapper">
+      <div class="last-update">
+        <i class="fas fa-clock"></i>
+        {{ lastUpdated ? (lastUpdated | date:'shortTime') : 'Cargando...' }}
+      </div>
+
+      <button class="btn-secondary" (click)="abrirReporte()">
+        📊 Reporte
+      </button>
+
+      <button class="btn-primary" (click)="abrirModalCrear()">
+        + Nuevo Usuario
       </button>
     </div>
-    <p class="last-update">
-      Última actualización:
-      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
-      <span *ngIf="!lastUpdated">Cargando...</span>
-    </p>
+  </header>
+
+  <!-- LOADING -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando usuarios...</p>
   </div>
 
-  <!-- ========================================
-       LOADING
-       ======================================== -->
-  <div *ngIf="cargando" class="loading">
-    <span>⏳ Cargando usuarios...</span>
+  <!-- TABLA -->
+  <div class="table-card" *ngIf="!cargando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th>Usuario</th>
+            <th>Nombre Completo</th>
+            <th>Email</th>
+            <th>Rol</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <tr *ngFor="let u of usuarios">
+            <td class="text-muted">#{{ u.idUsuario }}</td>
+
+            <td>
+              <span class="code-badge">@{{ u.nombreUsuario }}</span>
+            </td>
+
+            <td class="entity-title">{{ u.nombreCompleto }}</td>
+
+            <td class="entity-subtitle">
+              {{ u.email || '—' }}
+            </td>
+
+            <td>
+              <span class="role-chip"
+                    [class.role-admin]="u.rol === 'admin'"
+                    [class.role-vendedor]="u.rol === 'vendedor'">
+                {{ u.rol | uppercase }}
+              </span>
+            </td>
+
+            <td>
+              <span class="status-chip" [ngClass]="getEstadoClass(u.estado)">
+                <span class="dot"></span> {{ u.estado }}
+              </span>
+            </td>
+
+            <td class="text-muted">
+              {{ formatearFecha(u.fechaRegistro) }}
+            </td>
+
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="abrirModalEditar(u)">✏️</button>
+                <button class="btn-icon delete" (click)="confirmarEliminar(u)">🗑️</button>
+              </div>
+            </td>
+          </tr>
+
+          <tr *ngIf="usuarios.length === 0">
+            <td colspan="8" class="empty-state-row">
+              <div class="empty-content">
+                <div class="empty-icon">📭</div>
+                <p>No hay usuarios registrados</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
-  <!-- ========================================
-       TABLA DE USUARIOS
-       ======================================== -->
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Usuario</th>
-          <th>Nombre</th>
-          <th>Email</th>
-          <th>Rol</th>
-          <th>Estado</th>
-          <th>Fecha Registro</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <!-- Filas de usuarios -->
-        <tr *ngFor="let u of usuarios">
-          <td>{{ u.idUsuario }}</td>
-          <td><strong>{{ u.nombreUsuario }}</strong></td>
-          <td>{{ u.nombreCompleto }}</td>
-          <td class="email">{{ u.email || '-' }}</td>
-          <td>
-            <span class="badge" 
-                  [class.badge-admin]="u.rol === 'admin'"
-                  [class.badge-vendedor]="u.rol === 'vendedor'">
-              {{ u.rol | uppercase }}
-            </span>
-          </td>
-          <td>
-            <span [class]="getEstadoClass(u.estado)">
-              {{ u.estado }}
-            </span>
-          </td>
-          <td class="fecha">{{ formatearFecha(u.fechaRegistro) }}</td>
-          <td class="acciones">
-            <!-- Botón Editar -->
-            <button 
-              class="btn-editar" 
-              (click)="abrirModalEditar(u)"
-              title="Editar usuario">
-              ✏️
-            </button>
-            <!-- Botón Eliminar -->
-            <button 
-              class="btn-eliminar" 
-              (click)="confirmarEliminar(u)"
-              title="Eliminar usuario">
-              🗑️
-            </button>
-          </td>
-        </tr>
-
-        <!-- Mensaje cuando no hay datos -->
-        <tr *ngIf="usuarios.length === 0 && !cargando">
-          <td colspan="8" class="no-data">
-            📭 No hay usuarios registrados en el sistema
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ========================================
-       FOOTER
-       ======================================== -->
-  <div class="footer">
+  <div class="footer-info">
     <p>Total de usuarios: <strong>{{ usuarios.length }}</strong></p>
   </div>
 
 </div>
 
-<!-- ========================================
-     🔥 MODAL REUTILIZABLE
-     
-     ANTES: ~60 líneas de HTML inline
-     AHORA: Solo esta línea
-     
-     PROPIEDADES:
-     - isOpen: Controla visibilidad
-     - modoEdicion: true = editar, false = crear
-     - usuarioEditar: Datos a editar (solo en modo edición)
-     
-     EVENTOS:
-     - (cerrar): Se ejecuta al cerrar el modal
-     - (guardar): Se ejecuta al guardar, recibe los datos
-     ======================================== -->
 <app-modal-usuario
   [isOpen]="mostrarModal"
   [modoEdicion]="modoEdicion"
   [usuarioEditar]="usuarioParaEditar"
+  [guardando]="guardando"
   (cerrar)="onModalCerrar()"
   (guardar)="onModalGuardar($event)">
 </app-modal-usuario>
+
+<app-reporte-usuarios
+  [isOpen]="mostrarReporte"
+  (cerrar)="cerrarReporte()">
+</app-reporte-usuarios>

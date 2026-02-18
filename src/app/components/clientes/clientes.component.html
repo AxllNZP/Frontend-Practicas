@@ -1,62 +1,137 @@
-<div class="container">
+<div class="main-container fade-in">
 
-  <div class="header">
-    <div class="header-content">
-      <h1>👥 Gestión de Clientes</h1>
-      <button class="btn-crear" (click)="abrirModalCrear()">➕ Nuevo Cliente</button>
+  <header class="page-header">
+    <div class="title-wrapper">
+      <div class="icon-box">👥</div>
+      <div>
+        <h1>Gestión de Clientes</h1>
+        <p class="subtitle">Directorio de clientes y empresas</p>
+      </div>
     </div>
-    <p class="last-update">
-      Última actualización:
-      <span *ngIf="lastUpdated">{{ lastUpdated | date:'medium' }}</span>
-      <span *ngIf="!lastUpdated">Cargando...</span>
-    </p>
+
+    <div class="actions-wrapper">
+      <div class="last-update">
+        <i class="fas fa-clock"></i>
+        {{ lastUpdated ? (lastUpdated | date:'shortTime') : 'Cargando...' }}
+      </div>
+
+      <button class="btn-secondary" (click)="abrirReporte()">
+        📊 Reporte
+      </button>
+
+      <button class="btn-primary" (click)="abrirModalCrear()">
+        + Nuevo Cliente
+      </button>
+    </div>
+  </header>
+
+  <!-- TABLA IGUAL QUE TENÍAS -->
+
+
+    <!-- TU TABLA ORIGINAL -->
+    <!-- NO TOQUES NADA DE ABAJO -->
+
+
+  <!-- LOADING -->
+  <div *ngIf="cargando" class="loading-state">
+    <div class="spinner"></div>
+    <p>Cargando directorio...</p>
   </div>
 
-  <div *ngIf="cargando" class="loading">⏳ Cargando clientes...</div>
+  <!-- TABLA -->
+  <div class="table-card" *ngIf="!cargando">
+    <div class="table-responsive">
+      <table>
+        <thead>
+          <tr>
+            <th class="col-id">ID</th>
+            <th>Cliente / Razón Social</th>
+            <th>Documento</th>
+            <th>Contacto</th>
+            <th>Estado</th>
+            <th>Fecha Registro</th>
+            <th class="col-actions">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let c of clientes">
+            <td class="text-muted">#{{ c.idCliente }}</td>
+            
+            <!-- Cliente + Dirección -->
+            <td>
+              <div class="client-info">
+                <span class="client-name">{{ c.nombreRazonSocial }}</span>
+                <span class="client-address" title="{{ c.direccion }}">
+                  <i class="fas fa-map-marker-alt" *ngIf="c.direccion"></i> 
+                  {{ c.direccion || 'Sin dirección' }}
+                </span>
+              </div>
+            </td>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Tipo Doc.</th>
-          <th>N° Documento</th>
-          <th>Nombre</th>
-          <th>Dirección</th>
-          <th>Teléfono</th>
-          <th>Email</th>
-          <th>Estado</th>
-          <th>Fecha</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
+            <!-- Documento -->
+            <td>
+              <div class="doc-info">
+                <span class="doc-number">{{ c.numeroDocumento }}</span>
+                <span class="doc-type">{{ c.tipoDocumento }}</span>
+              </div>
+            </td>
 
-      <tbody>
-        <tr *ngFor="let c of clientes">
-          <td>{{ c.idCliente }}</td>
-          <td>{{ c.tipoDocumento }}</td>
-          <td>{{ c.numeroDocumento }}</td>
-          <td>{{ c.nombreRazonSocial }}</td>
-          <td>{{ c.direccion || '-' }}</td>
-          <td>{{ c.telefono || '-' }}</td>
-          <td>{{ c.email || '-' }}</td>
-          <td><span [class]="getEstadoClass(c.estado)">{{ c.estado }}</span></td>
-          <td>{{ formatearFecha(c.fechaRegistro) }}</td>
-          <td>
-            <button class="btn-editar" (click)="abrirModalEditar(c)">✏️</button>
-            <button class="btn-eliminar" (click)="confirmarEliminar(c)">🗑️</button>
-          </td>
-        </tr>
+            <!-- Contacto (Email + Teléfono) -->
+            <td>
+              <div class="contact-info">
+                <div class="contact-item" *ngIf="c.email">
+                  <span class="icon">✉️</span> {{ c.email }}
+                </div>
+                <div class="contact-item" *ngIf="c.telefono">
+                  <span class="icon">📞</span> {{ c.telefono }}
+                </div>
+                <span *ngIf="!c.email && !c.telefono" class="text-muted">-</span>
+              </div>
+            </td>
 
-        <tr *ngIf="clientes.length === 0 && !cargando">
-          <td colspan="10" class="no-data">📭 No hay clientes</td>
-        </tr>
-      </tbody>
-    </table>
+            <!-- Estado -->
+            <td>
+              <span class="status-chip" [ngClass]="getEstadoClass(c.estado)">
+                <span class="dot"></span> {{ c.estado }}
+              </span>
+            </td>
+
+            <td class="text-muted">{{ formatearFecha(c.fechaRegistro) }}</td>
+
+            <!-- Acciones -->
+            <td>
+              <div class="action-buttons">
+                <button class="btn-icon edit" (click)="abrirModalEditar(c)" title="Editar">
+                  ✏️
+                </button>
+                <button class="btn-icon delete" (click)="confirmarEliminar(c)" title="Eliminar">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- NO DATA -->
+          <tr *ngIf="clientes.length === 0">
+            <td colspan="7" class="empty-state-row">
+              <div class="empty-content">
+                <div class="empty-icon">📭</div>
+                <p>No hay clientes registrados</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+
+  <!-- FOOTER -->
+  <div class="footer-info">
+    <p>Total de clientes: <strong>{{ clientes.length }}</strong></p>
+  </div>
 
 
+<!-- MODAL -->
 <app-modal-cliente
   [isOpen]="mostrarModal"
   [modoEdicion]="modoEdicion"
@@ -65,3 +140,9 @@
   (cerrar)="onModalCerrar()"
   (guardar)="onModalGuardar($event)">
 </app-modal-cliente>
+
+<app-reporte-facturas
+  [isOpen]="mostrarReporte"
+  (cerrar)="cerrarReporte()">
+</app-reporte-facturas>
+

@@ -9,19 +9,14 @@
 
     <div class="modal-body">
 
-      <!-- ================= DATOS GENERALES ================= -->
+      <!-- DATOS GENERALES -->
       <div class="seccion">
         <h3>📋 Datos Generales</h3>
-
         <div class="form-grid">
 
           <div class="form-group">
             <label>Serie *</label>
-            <input
-              type="text"
-              [(ngModel)]="serie"
-              class="form-control"
-              placeholder="Ej: F001">
+            <input type="text" [(ngModel)]="serie" class="form-control" placeholder="Ej: F001">
           </div>
 
           <div class="form-group">
@@ -34,10 +29,9 @@
             </select>
           </div>
 
-
           <div class="form-group">
             <label>Usuario *</label>
-            <select [(ngModel)]="idUsuario"name="idUsuario" [disabled]="esVendedor"  class="form-control">
+            <select [(ngModel)]="idUsuario" name="idUsuario" [disabled]="esVendedor" class="form-control">
               <option value="0">-- Seleccione --</option>
               <option *ngFor="let u of usuarios" [value]="u.idUsuario">
                 {{ u.nombreCompleto }} ({{ u.nombreUsuario }})
@@ -45,9 +39,6 @@
             </select>
           </div>
 
-
-
-          <!-- 🔥 MOSTRAR SOLO SI ES ADMIN -->
           <div class="form-group">
             <label>Moneda *</label>
             <select [(ngModel)]="idMoneda" class="form-control">
@@ -58,36 +49,24 @@
             </select>
           </div>
 
-
           <div class="form-group full-width">
             <label>Observaciones</label>
-            <textarea
-              [(ngModel)]="observaciones"
-              class="form-control"
-              rows="2"
-              placeholder="Comentarios opcionales...">
-            </textarea>
+            <textarea [(ngModel)]="observaciones" class="form-control" rows="2" placeholder="Comentarios opcionales..."></textarea>
           </div>
 
         </div>
       </div>
 
-      <!-- ================= PRODUCTOS ================= -->
+      <!-- PRODUCTOS -->
       <div class="seccion">
-
         <div class="seccion-header">
           <h3>📦 Productos</h3>
-          <button class="btn-agregar" (click)="agregarDetalle()">
-            ➕ Agregar Producto
-          </button>
+          <button class="btn-agregar" (click)="agregarDetalle()">➕ Agregar Producto</button>
         </div>
 
         <div class="detalles-lista">
-
           <div *ngFor="let detalle of detalles; let i = index" class="detalle-item">
-
             <div class="detalle-campos">
-
               <div class="form-group">
                 <label>Producto *</label>
                 <select [(ngModel)]="detalle.idProducto" class="form-control">
@@ -97,57 +76,32 @@
                   </option>
                 </select>
               </div>
-
               <div class="form-group">
                 <label>Cantidad *</label>
-                <input
-                  type="number"
-                  [(ngModel)]="detalle.cantidad"
-                  class="form-control"
-                  min="1"
-                  placeholder="Cantidad">
+                <input type="number" [(ngModel)]="detalle.cantidad" class="form-control" min="1" placeholder="Cantidad">
               </div>
-
-              <button class="btn-eliminar-item" (click)="eliminarDetalle(i)">
-                🗑️
-              </button>
-
+              <button class="btn-eliminar-item" (click)="eliminarDetalle(i)">🗑️</button>
             </div>
           </div>
 
-          <div *ngIf="detalles.length === 0" class="lista-vacia">
-            📭 No hay productos agregados
-          </div>
-
+          <div *ngIf="detalles.length === 0" class="lista-vacia">📭 No hay productos agregados</div>
         </div>
       </div>
 
-      <!-- ================= PAGOS ================= -->
+      <!-- PAGOS -->
       <div class="seccion">
-
         <div class="seccion-header">
           <h3>💰 Pagos (Opcional)</h3>
-          <button class="btn-agregar" (click)="agregarPago()">
-            ➕ Agregar Pago
-          </button>
+          <button class="btn-agregar" (click)="agregarPago()">➕ Agregar Pago</button>
         </div>
 
         <div class="detalles-lista">
-
           <div *ngFor="let pago of pagos; let i = index" class="detalle-item">
-
             <div class="pago-campos">
-
               <div class="form-group">
                 <label>Monto *</label>
-                <input
-                  type="number"
-                  [(ngModel)]="pago.monto"
-                  class="form-control"
-                  step="0.01"
-                  placeholder="0.00">
+                <input type="number" [(ngModel)]="pago.monto" class="form-control" step="0.01" placeholder="0.00">
               </div>
-
               <div class="form-group">
                 <label>Forma Pago *</label>
                 <select [(ngModel)]="pago.idFormaPago" class="form-control">
@@ -156,46 +110,27 @@
                   <option value="3">Tarjeta</option>
                 </select>
               </div>
-
               <div class="form-group">
                 <label>N° Operación</label>
-                <input
-                  type="text"
-                  [(ngModel)]="pago.numeroOperacion"
-                  class="form-control"
-                  placeholder="OP-123456">
+                <input type="text" [(ngModel)]="pago.numeroOperacion" class="form-control" placeholder="OP-123456">
               </div>
-
-              <button class="btn-eliminar-item" (click)="eliminarPago(i)">
-                🗑️
-              </button>
-
+              <button class="btn-eliminar-item" (click)="eliminarPago(i)">🗑️</button>
             </div>
           </div>
 
-          <div *ngIf="pagos.length === 0" class="lista-vacia">
-            💳 Sin pagos registrados
-          </div>
-
+          <div *ngIf="pagos.length === 0" class="lista-vacia">💳 Sin pagos registrados</div>
         </div>
       </div>
 
     </div>
 
     <!-- FOOTER -->
-<div class="modal-footer">
-  <button class="btn-cancelar" 
-          (click)="cerrar()"
-          [disabled]="guardando">
-    Cancelar
-  </button>
-  
-  <button class="btn-guardar" 
-          (click)="guardarFactura()"
-          [disabled]="guardando">
-    {{ guardando ? '⏳ Creando...' : '💾 Crear Factura' }}
-  </button>
-</div>
+    <div class="modal-footer">
+      <button class="btn-cancelar" (click)="cerrar()" [disabled]="guardando">Cancelar</button>
+      <button class="btn-guardar" (click)="guardarFactura()" [disabled]="guardando">
+        {{ guardando ? '⏳ Creando...' : '💾 Crear Factura' }}
+      </button>
+    </div>
 
   </div>
 </div>

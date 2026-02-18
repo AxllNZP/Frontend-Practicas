@@ -1,17 +1,33 @@
-<div class="profile-container" *ngIf="user">
+<div class="profile-container fade-in" *ngIf="user">
 
   <div class="profile-card">
-    
+
     <div class="avatar">
       {{ getInitials() }}
     </div>
 
-    <h2>{{ user.nombreCompleto }}</h2>
+    <h2 class="profile-name">
+      {{ user.nombreCompleto }}
+    </h2>
+
+    <span class="role-chip"
+          [class.role-admin]="user.rol === 'admin'"
+          [class.role-vendedor]="user.rol === 'vendedor'">
+      {{ user.rol | uppercase }}
+    </span>
 
     <div class="info">
-      <p><strong>Usuario:</strong> {{ user.nombreUsuario }}</p>
-      <p><strong>Email:</strong> {{ user.email }}</p>
-      <p><strong>Rol:</strong> {{ user.rol }}</p>
+
+      <div class="info-item">
+        <span class="label">Usuario</span>
+        <span class="value">@{{ user.nombreUsuario }}</span>
+      </div>
+
+      <div class="info-item">
+        <span class="label">Email</span>
+        <span class="value">{{ user.email }}</span>
+      </div>
+
     </div>
 
   </div>

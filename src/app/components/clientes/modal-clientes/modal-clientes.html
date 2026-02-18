@@ -1,64 +1,123 @@
 <div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
-
-  <div class="modal-content" (click)="onContentClick($event)">
-
-    <div class="modal-header">
-      <i>➕</i>
-      {{ getTitulo() }}
-      <button class="close-btn" (click)="cerrarModal()">✖</button>
-    </div>
-
-    <div class="modal-body">
-
-      <label>Tipo Documento</label>
-      <select [(ngModel)]="cliente.tipoDocumento" >
-        <option value="DNI">DNI</option>
-        <option value="RUC">RUC</option>
-        <option value="CE">CE</option>
-        <option value="PASAPORTE">PASAPORTE</option>
-      </select>
-
-      <label>N° Documento</label>
-      <input
-        [(ngModel)]="cliente.numeroDocumento"
-        (input)="onNumeroDocumentoInput($event)"
-        [attr.maxlength]="getMaxLength()"
-        [attr.inputmode]="esSoloNumeros() ? 'numeric' : 'text'"
-        placeholder="N° Documento">
-
-      <label>Nombre / Razón Social</label>
-      <input [(ngModel)]="cliente.nombreRazonSocial" placeholder="Nombre o Razón Social">
-
-      <label>Dirección</label>
-      <input [(ngModel)]="cliente.direccion" placeholder="Dirección">
-
-      <label>Teléfono</label>
-      <input [(ngModel)]="cliente.telefono" placeholder="Teléfono">
-
-      <label>Email</label>
-      <input [(ngModel)]="cliente.email" placeholder="Email">
-
-      <label>Estado</label>
-      <select [(ngModel)]="cliente.estado">
-        <option value="activo">Activo</option>
-        <option value="inactivo">Inactivo</option>
-      </select>
-
-    </div>
-
-    <div class="modal-footer">
-  <button class="btn-cancelar" 
-          (click)="cerrarModal()"
-          [disabled]="guardando">
-    Cancelar
-  </button>
   
-  <button class="btn-guardar" 
-          (click)="guardarCliente()"
-          [disabled]="guardando">
-    {{ guardando ? '⏳ Guardando...' : 'Guardar' }}
-  </button>
-</div>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="title-section">
+        <div class="icon-badge client-badge">
+          {{ modoEdicion ? '✏️' : '👥' }}
+        </div>
+        <div>
+          <h2>{{ getTitulo() }}</h2>
+          <p class="subtitle">{{ modoEdicion ? 'Actualiza la información del cliente' : 'Registra un nuevo cliente o empresa' }}</p>
+        </div>
+      </div>
+      <button class="btn-icon-close" (click)="cerrarModal()" title="Cerrar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+      <div class="form-grid">
+        
+        <!-- Tipo Documento -->
+        <div class="form-group">
+          <label for="tipoDoc">Tipo Documento <span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select id="tipoDoc" class="form-select" [(ngModel)]="cliente.tipoDocumento">
+              <option value="DNI">DNI - Doc. Nacional Identidad</option>
+              <option value="RUC">RUC - Reg. Único Contribuyentes</option>
+              <option value="CE">CE - Carnet Extranjería</option>
+              <option value="PASAPORTE">PASAPORTE</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Número Documento -->
+        <div class="form-group">
+          <label for="numDoc">N° Documento <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input id="numDoc" type="text" class="form-input"
+                   [(ngModel)]="cliente.numeroDocumento"
+                   (input)="onNumeroDocumentoInput($event)"
+                   [attr.maxlength]="getMaxLength()"
+                   [attr.inputmode]="esSoloNumeros() ? 'numeric' : 'text'"
+                   placeholder="Ingrese número">
+          </div>
+          <small class="helper-text">Máx. {{ getMaxLength() }} caracteres</small>
+        </div>
+
+        <!-- Nombre / Razón Social (Full Width) -->
+        <div class="form-group full-width">
+          <label for="nombre">Nombre / Razón Social <span class="required">*</span></label>
+          <div class="input-wrapper">
+            <input id="nombre" type="text" class="form-input" 
+                   [(ngModel)]="cliente.nombreRazonSocial" 
+                   placeholder="Ej. Juan Pérez o Empresa S.A.C.">
+          </div>
+        </div>
+
+        <!-- Dirección (Full Width) -->
+        <div class="form-group full-width">
+          <label for="direccion">Dirección</label>
+          <div class="input-wrapper">
+            <input id="direccion" type="text" class="form-input" 
+                   [(ngModel)]="cliente.direccion" 
+                   placeholder="Ej. Av. Principal 123, Lima">
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div class="form-group">
+          <label for="telefono">Teléfono</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">📞</span>
+            <input id="telefono" type="tel" class="form-input has-prefix" 
+                   [(ngModel)]="cliente.telefono" 
+                   placeholder="999 999 999">
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email</label>
+          <div class="input-wrapper">
+            <span class="input-prefix">✉️</span>
+            <input id="email" type="email" class="form-input has-prefix" 
+                   [(ngModel)]="cliente.email" 
+                   placeholder="cliente@ejemplo.com">
+          </div>
+        </div>
+
+        <!-- Estado -->
+        <div class="form-group full-width">
+          <label for="estado">Estado <span class="required">*</span></label>
+          <div class="select-wrapper">
+            <select id="estado" class="form-select" [(ngModel)]="cliente.estado">
+              <option value="activo">✅ Activo</option>
+              <option value="inactivo">⛔ Inactivo</option>
+            </select>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button class="btn-secondary" (click)="cerrarModal()" [disabled]="guardando">
+        Cancelar
+      </button>
+      
+      <button class="btn-primary" (click)="guardarCliente()" [disabled]="guardando">
+        <span *ngIf="guardando" class="spinner-sm"></span>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar Cliente' : 'Registrar Cliente') }}
+      </button>
+    </div>
 
   </div>
 </div>

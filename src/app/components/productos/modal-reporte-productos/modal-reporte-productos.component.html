@@ -1,0 +1,92 @@
+<div class="modal-overlay" *ngIf="mostrar" (click)="cerrar.emit()">
+
+  <div class="modal-container" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="title-section">
+        <div class="icon-badge">📦</div>
+        <div>
+          <h2>Reporte de Productos</h2>
+          <p class="subtitle">Genera reportes por producto y rango de fechas</p>
+        </div>
+      </div>
+
+      <button class="btn-icon-close" (click)="cerrar.emit()">
+        ✖
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Producto</label>
+          <select class="form-select" [(ngModel)]="productoSeleccionado">
+            <option value="todos">Todos</option>
+            <option *ngFor="let p of productos" [value]="p.idProducto">
+              {{ p.nombre }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Inicio</label>
+          <input type="date" class="form-input" [(ngModel)]="fechaInicio">
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Fin</label>
+          <input type="date" class="form-input" [(ngModel)]="fechaFin">
+        </div>
+
+        <div class="form-group full-width">
+          <button class="btn-primary" (click)="buscar()">
+            Buscar
+          </button>
+        </div>
+
+      </div>
+
+      <!-- PREVISUALIZACIÓN -->
+      <div *ngIf="resultados.length > 0" class="preview-table">
+
+  <table>
+    <thead>
+      <tr>
+        <th>Código</th>
+        <th>Producto</th>
+        <th>Stock</th>
+        <th>Unidades Vendidas</th>
+        <th>Ingresos</th>
+        <th>Facturas</th>
+        <th>Clientes</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let r of resultados">
+        <td>{{ r.codigo }}</td>
+        <td>{{ r.nombre }}</td>
+        <td>{{ r.stockActual }}</td>
+        <td>{{ r.totalUnidadesVendidas }}</td>
+        <td>{{ r.totalIngresos }}</td>
+        <td>{{ r.totalFacturas }}</td>
+        <td>{{ r.clientes.join(', ') }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="export-buttons">
+    <button class="btn-secondary" (click)="exportarPdf()">PDF</button>
+    <button class="btn-primary" (click)="exportarExcel()">Excel</button>
+  </div>
+
+</div>
+
+
+    </div>
+
+  </div>
+</div>

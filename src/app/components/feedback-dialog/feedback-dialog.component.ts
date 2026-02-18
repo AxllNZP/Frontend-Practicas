@@ -19,7 +19,7 @@ export class FeedbackDialogComponent {
 
   constructor(
     @Inject(MAT_DIALOG_DATA) public data: FeedbackDialogData,
-    private dialogRef: MatDialogRef<FeedbackDialogComponent>
+    public dialogRef: MatDialogRef<FeedbackDialogComponent>
   ) {}
 
   cerrar(respuesta: boolean = false) {

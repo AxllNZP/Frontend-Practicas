@@ -1,30 +1,113 @@
 <div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
-
-  <div class="modal-content" (click)="onContentClick($event)">
-    <h2>{{ getTitulo() }}</h2>
-
-    <input
-      placeholder="Nombre"
-      [(ngModel)]="nombre">
-
-    <input
-      placeholder="Símbolo"
-      [(ngModel)]="simbolo">
-
-    <input
-      placeholder="Código (USD, EUR)"
-      [(ngModel)]="codigo">
-
-    <div class="acciones-modal">
-  <button (click)="cerrarModal()"
-          [disabled]="guardando">
-    Cancelar
-  </button>
   
-  <button (click)="guardarMoneda()"
-          [disabled]="guardando">
-    {{ guardando ? '⏳ Guardando...' : 'Guardar' }}
-  </button>
-</div>
+  <div class="modal-container" (click)="$event.stopPropagation()">
+    
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="title-section">
+        <div class="icon-badge currency-badge">
+          {{ modoEdicion ? '✏️' : '💱' }}
+        </div>
+        <div>
+          <h2>{{ getTitulo() }}</h2>
+          <p class="subtitle">{{ modoEdicion ? 'Editar divisa existente' : 'Registrar nueva divisa' }}</p>
+        </div>
+      </div>
+      <button class="btn-icon-close" (click)="cerrarModal()" title="Cerrar">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
 
+    <!-- BODY -->
+    <div class="modal-body">
+      <div class="form-grid">
+        
+        <!-- ================================ -->
+        <!-- Nombre de Moneda -->
+        <!-- ================================ -->
+        <div class="form-group full-width">
+          <label for="nombre">Nombre <span class="required">*</span></label>
+          <div class="input-wrapper" [class.error]="nombreInvalido">
+            <input 
+              id="nombre" 
+              type="text" 
+              class="form-input" 
+              [(ngModel)]="nombre" 
+              placeholder="Ej. Dólar Americano, Sol Peruano"
+              [class.input-error]="nombreInvalido">
+          </div>
+          <!-- 🆕 MENSAJE DE ERROR -->
+          <small class="error-text" *ngIf="nombreInvalido">
+            ⚠️ El nombre es obligatorio
+          </small>
+        </div>
+
+        <!-- ================================ -->
+        <!-- Símbolo -->
+        <!-- ================================ -->
+        <div class="form-group">
+          <label for="simbolo">Símbolo <span class="required">*</span></label>
+          <div class="input-wrapper" [class.error]="simboloInvalido">
+            <input 
+              id="simbolo" 
+              type="text" 
+              class="form-input text-center" 
+              [(ngModel)]="simbolo" 
+              placeholder="$"
+              maxlength="3"
+              [class.input-error]="simboloInvalido">
+          </div>
+          <!-- 🆕 MENSAJE DE ERROR -->
+          <small class="error-text" *ngIf="simboloInvalido">
+            ⚠️ El símbolo es obligatorio
+          </small>
+        </div>
+
+        <!-- ================================ -->
+        <!-- Código ISO -->
+        <!-- ================================ -->
+        <div class="form-group">
+          <label for="codigo">Código ISO <span class="required">*</span></label>
+          <div class="input-wrapper" [class.error]="codigoInvalido">
+            <input 
+              id="codigo" 
+              type="text" 
+              class="form-input text-uppercase text-center" 
+              [(ngModel)]="codigo" 
+              placeholder="USD"
+              maxlength="3"
+              [class.input-error]="codigoInvalido">
+          </div>
+          <!-- Helper text y error -->
+          <small class="helper-text" *ngIf="!codigoInvalido">Ej: USD, PEN, EUR</small>
+          <!-- 🆕 MENSAJE DE ERROR -->
+          <small class="error-text" *ngIf="codigoInvalido">
+            ⚠️ El código ISO es obligatorio
+          </small>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <div class="modal-footer">
+      <button 
+        class="btn-secondary" 
+        (click)="cerrarModal()" 
+        [disabled]="guardando">
+        Cancelar
+      </button>
+      
+      <button 
+        class="btn-primary" 
+        (click)="guardarMoneda()" 
+        [disabled]="guardando">
+        <span *ngIf="guardando" class="spinner-sm"></span>
+        {{ guardando ? 'Guardando...' : (modoEdicion ? 'Actualizar Moneda' : 'Crear Moneda') }}
+      </button>
+    </div>
+
+  </div>
 </div>

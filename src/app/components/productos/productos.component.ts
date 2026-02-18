@@ -7,12 +7,14 @@ import { Subscription, interval, firstValueFrom } from 'rxjs';
 import { ProductoModalComponent } from './modal-productos/modal-productos';
 import { MatDialog } from '@angular/material/dialog';
 import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
+import { ModalReporteProductosComponent } from './modal-reporte-productos/modal-reporte-productos.component';
+
 
 
 @Component({
   selector: 'app-productos',
   standalone: true,
-  imports: [CommonModule, FormsModule,ProductoModalComponent],
+  imports: [CommonModule, FormsModule,ProductoModalComponent,ModalReporteProductosComponent],
   templateUrl: './productos.component.html',
   styleUrls: ['./productos.component.css']
 })
@@ -26,6 +28,8 @@ export class ProductosComponent implements OnInit, OnDestroy {
   mostrarModal = false;
   modoEdicion = false;
   productoSeleccionado: Partial<ProductoDto> = {};
+  mostrarModalReporte = false;
+
 
   private pollingSub?: Subscription;
   private readonly POLL_MS = 5000;
@@ -56,7 +60,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
         this.productos = [...data];
         this.lastUpdated = new Date();
         this.cargando = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: err => {
         console.error('ERROR productos', err);
@@ -97,7 +101,6 @@ export class ProductosComponent implements OnInit, OnDestroy {
   }
 
   abrirModalEditar(p: ProductoDto): void {
-    this.stopPolling();
     this.modoEdicion = true;
     this.productoSeleccionado = { ...p };
     this.mostrarModal = true;
@@ -234,7 +237,41 @@ export class ProductosComponent implements OnInit, OnDestroy {
     return 'stock-normal';
   }
 
+  generarPdfReporte(data: {inicio: string, fin: string, idProducto?: string}) {
+
+  let url = `http://localhost:8080/api/reportes/productos/pdf?fechaInicio=${data.inicio}&fechaFin=${data.fin}`;
+
+  if (data.idProducto) {
+    url += `&idProducto=${data.idProducto}`;
+  }
+
+  window.open(url, '_blank');
+  this.cerrarModalReporte();
+}
+
+  generarExcelReporte(data: {inicio: string, fin: string, idProducto?: string}) {
+
+  let url = `http://localhost:8080/api/reportes/productos/excel?fechaInicio=${data.inicio}&fechaFin=${data.fin}`;
+
+  if (data.idProducto) {
+    url += `&idProducto=${data.idProducto}`;
+  }
+
+  window.open(url, '_blank');
+  this.cerrarModalReporte();
+}
+
+
+
   formatearFecha(f: string): string {
     return new Date(f).toLocaleString('es-PE');
   }
+  abrirModalReporte(): void {
+  this.mostrarModalReporte = true;
+}
+
+cerrarModalReporte(): void {
+  this.mostrarModalReporte = false;
+}
+
 }

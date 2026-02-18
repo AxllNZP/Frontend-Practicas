@@ -1,0 +1,85 @@
+<div class="modal-overlay" *ngIf="isOpen" (click)="cerrarModal()">
+
+  <div class="modal-container" (click)="$event.stopPropagation()">
+
+    <!-- HEADER -->
+    <div class="modal-header">
+      <div class="title-section">
+        <div class="icon-badge">📊</div>
+        <div>
+          <h2>Reporte de Facturas</h2>
+          <p class="subtitle">Genera reportes por cliente y rango de fechas</p>
+        </div>
+      </div>
+
+      <button class="btn-icon-close" (click)="cerrarModal()">
+        ✖
+      </button>
+    </div>
+
+    <!-- BODY -->
+    <div class="modal-body">
+
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Cliente</label>
+          <select class="form-select" [(ngModel)]="clienteSeleccionado">
+            <option [ngValue]="undefined">Seleccione</option>
+            <option *ngFor="let c of clientes" [ngValue]="c">
+              {{ c.nombreRazonSocial }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Inicio</label>
+          <input type="date" class="form-input" [(ngModel)]="fechaInicio">
+        </div>
+
+        <div class="form-group">
+          <label>Fecha Fin</label>
+          <input type="date" class="form-input" [(ngModel)]="fechaFin">
+        </div>
+
+        <div class="form-group full-width">
+          <button class="btn-primary" (click)="buscar()">
+            Buscar
+          </button>
+        </div>
+
+      </div>
+
+      <!-- PREVISUALIZACIÓN -->
+      <div *ngIf="facturas.length > 0" class="preview-table">
+
+        <table>
+          <thead>
+            <tr>
+              <th>N°</th>
+              <th>Fecha</th>
+              <th>Total</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let f of facturas">
+              <td>{{ f.numeroFactura }}</td>
+              <td>{{ f.fechaEmision }}</td>
+              <td>{{ f.total }}</td>
+              <td>{{ f.estado }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="export-buttons">
+          <button class="btn-secondary" (click)="exportarPdf()">PDF</button>
+          <button class="btn-primary" (click)="exportarExcel()">Excel</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>

@@ -4,36 +4,21 @@ import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { UsuarioService, UsuarioDto } from '../../services/usuario.service';
-import { Subscription, interval } from 'rxjs';
-
-// 🔥 IMPORTAR EL NUEVO COMPONENTE MODAL
+import { Subscription, interval, firstValueFrom } from 'rxjs'; // 👈 Agrega firstValueFrom
+import { MatDialog } from '@angular/material/dialog';
+import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
 import { ModalUsuarioComponent } from './modal-usuario/modal-usuario';
+import { ReporteUsuariosComponent } from './usuario-reporte/reporte-usuarios.component';
 
-/**
- * 📖 COMPONENTE DE USUARIOS - VERSIÓN MEJORADA
- * 
- * CAMBIOS APLICADOS:
- * ✅ Se eliminó todo el código HTML del modal inline
- * ✅ Se agregó el componente ModalUsuarioComponent
- * ✅ La lógica de creación/edición está SEPARADA
- * ✅ Código mucho más limpio y mantenible
- * 
- * FLUJO DE TRABAJO:
- * 1. Usuario hace clic en "Nuevo Usuario" o "Editar"
- * 2. Se abre el modal (ModalUsuarioComponent)
- * 3. Usuario llena/modifica el formulario
- * 4. Modal emite evento con los datos
- * 5. Este componente recibe los datos y llama al servicio
- * 6. Backend procesa la petición
- * 7. Se cierra el modal y se recarga la tabla
- */
+
 @Component({
   selector: 'app-usuarios',
   standalone: true,
   imports: [
     CommonModule, 
     FormsModule,
-    ModalUsuarioComponent  // 🔥 AÑADIDO: Importar el modal
+    ModalUsuarioComponent,
+    ReporteUsuariosComponent  
   ],
   templateUrl: './usuarios.component.html',
   styleUrls: ['./usuarios.component.css']
@@ -46,6 +31,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   usuarios: UsuarioDto[] = [];
   lastUpdated: Date | null = null;
   cargando = false;
+  guardando = false;
 
   // ========================================
   // 🎬 CONTROL DEL MODAL
@@ -62,7 +48,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
 
   constructor(
     private usuarioService: UsuarioService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+  private dialog: MatDialog
   ) {}
 
   // ========================================
@@ -94,7 +81,7 @@ export class UsuariosComponent implements OnInit, OnDestroy {
         this.usuarios = [...data];
         this.lastUpdated = new Date();
         this.cargando = false;
-        this.cdr.detectChanges();
+        this.cdr.markForCheck();
       },
       error: err => {
         console.error('✗ ERROR al cargar usuarios:', err);
@@ -153,9 +140,8 @@ export class UsuariosComponent implements OnInit, OnDestroy {
    */
   abrirModalEditar(usuario: UsuarioDto): void {
     console.log('✏️ Abriendo modal para editar usuario:', usuario.nombreUsuario);
-    this.stopPolling();
     this.modoEdicion = true;
-    this.usuarioParaEditar = { ...usuario };  // Clonar para evitar mutaciones
+    this.usuarioParaEditar = { ...usuario };
     this.mostrarModal = true;
   }
 
@@ -173,80 +159,116 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   /**
    * 🔥 NUEVO: Guarda los datos recibidos del modal
    */
-  onModalGuardar(datos: any): void {
-    console.log('💾 Datos recibidos del modal:', datos);
-    
-    this.stopPolling();
+  async onModalGuardar(datos: any): Promise<void> {
+  console.log('💾 Datos recibidos del modal:', datos);
+  
+  if (this.guardando) return;
 
-    // Determinar si es creación o edición
+  this.guardando = true;
+  this.cdr.detectChanges();
+
+  try {
     if (this.modoEdicion && datos.idUsuario) {
       // MODO EDICIÓN
-      this.usuarioService.actualizar(datos.idUsuario, datos).subscribe({
-        next: () => {
-          alert(`✅ Usuario "${datos.nombreUsuario}" actualizado correctamente`);
-          this.finalizarOperacion();
-        },
-        error: err => {
-          console.error('❌ Error al actualizar usuario:', err);
-          alert('❌ Error al actualizar usuario: ' + (err.message || 'Error desconocido'));
-          this.startPolling();
-        }
+      await firstValueFrom(
+        this.usuarioService.actualizar(datos.idUsuario, datos)
+      );
+
+      await this.mostrarDialogo({
+        tipo: 'success',
+        titulo: '✅ Usuario Actualizado',
+        mensaje: `El usuario "${datos.nombreUsuario}" se actualizó correctamente`
       });
+
     } else {
       // MODO CREACIÓN
-      this.usuarioService.crear(datos).subscribe({
-        next: () => {
-          alert(`✅ Usuario "${datos.nombreUsuario}" creado correctamente`);
-          this.finalizarOperacion();
-        },
-        error: err => {
-          console.error('❌ Error al crear usuario:', err);
-          alert('❌ Error al crear usuario: ' + (err.message || 'Error desconocido'));
-          this.startPolling();
-        }
+      await firstValueFrom(this.usuarioService.crear(datos));
+
+      await this.mostrarDialogo({
+        tipo: 'success',
+        titulo: '✅ Usuario Creado',
+        mensaje: `El usuario "${datos.nombreUsuario}" se creó exitosamente`
       });
     }
+
+    this.finalizarOperacion();
+
+  } catch (error: any) {
+    const mensajeError = error.error?.message || error.message || 'Error desconocido';
+    
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Guardar',
+      mensaje: `No se pudo guardar el usuario.\n\n${mensajeError}`
+    });
+  } finally {
+    this.guardando = false;
+    this.cdr.detectChanges();
   }
+}
 
   /**
    * Finaliza la operación de guardar
    */
   private finalizarOperacion(): void {
-    this.mostrarModal = false;
-    this.modoEdicion = false;
-    this.usuarioParaEditar = undefined;
-    this.cargarUsuarios();
-    this.startPolling();
-  }
+  this.mostrarModal = false;
+  this.modoEdicion = false;
+  this.usuarioParaEditar = undefined;
+  this.cargarUsuarios();
+  this.startPolling();
+}
+
+// 🆕 AGREGAR ESTA FUNCIÓN COMPLETA:
+private async mostrarDialogo(data: FeedbackDialogData): Promise<boolean> {
+  const dialogRef = this.dialog.open(FeedbackDialogComponent, {
+    width: '400px',
+    disableClose: true,
+    data: data
+  });
+
+  const resultado = await firstValueFrom(dialogRef.afterClosed());
+  return resultado === true;
+}
+
+// ========================================
+// 🗑️ ELIMINAR USUARIO
 
   // ========================================
   // 🗑️ ELIMINAR USUARIO
   // ========================================
   
-  confirmarEliminar(usuario: UsuarioDto): void {
-    const ok = confirm(
-      `¿Eliminar usuario?\n\n` +
-      `Usuario: ${usuario.nombreUsuario}\n` +
-      `Nombre: ${usuario.nombreCompleto}\n\n` +
-      `Esta acción no se puede deshacer.`
-    );
+  async confirmarEliminar(usuario: UsuarioDto): Promise<void> {
+  const confirmado = await this.mostrarDialogo({
+    tipo: 'confirm',
+    titulo: '⚠️ Confirmar Eliminación',
+    mensaje: `¿Estás seguro de eliminar el usuario?\n\nUsuario: ${usuario.nombreUsuario}\nNombre: ${usuario.nombreCompleto}\n\nEsta acción no se puede deshacer.`
+  });
 
-    if (!ok) return;
+  if (!confirmado) return;
 
-    console.log('🗑️ Eliminando usuario:', usuario.idUsuario);
+  console.log('🗑️ Eliminando usuario:', usuario.idUsuario);
 
-    this.usuarioService.eliminar(usuario.idUsuario).subscribe({
-      next: () => {
-        alert(`✅ Usuario "${usuario.nombreUsuario}" eliminado correctamente`);
-        this.cargarUsuarios();
-      },
-      error: err => {
-        console.error('❌ Error al eliminar usuario:', err);
-        alert('❌ Error al eliminar usuario: ' + (err.message || 'Error desconocido'));
-      }
+  try {
+    await firstValueFrom(this.usuarioService.eliminar(usuario.idUsuario));
+
+    await this.mostrarDialogo({
+      tipo: 'success',
+      titulo: '🗑️ Usuario Eliminado',
+      mensaje: `El usuario "${usuario.nombreUsuario}" fue eliminado correctamente`
+    });
+
+    this.cargarUsuarios();
+
+  } catch (error: any) {
+    const mensajeError = error.error?.message || error.message || 'Error desconocido';
+    
+    await this.mostrarDialogo({
+      tipo: 'error',
+      titulo: '❌ Error al Eliminar',
+      mensaje: `No se pudo eliminar el usuario.\n\n${mensajeError}`
     });
   }
-
+}
   // ========================================
   // 🛠️ UTILIDADES
   // ========================================
@@ -264,4 +286,18 @@ export class UsuariosComponent implements OnInit, OnDestroy {
   getEstadoClass(estado: string): string {
     return estado === 'activo' ? 'estado-activo' : 'estado-inactivo';
   }
+  
+mostrarReporte = false;
+
+abrirReporte(): void {
+  this.stopPolling();
+  this.mostrarReporte = true;
+}
+
+cerrarReporte(): void {
+  this.mostrarReporte = false;
+  this.startPolling();
+}
+
+
 }

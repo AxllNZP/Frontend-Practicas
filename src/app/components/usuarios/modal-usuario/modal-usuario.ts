@@ -55,6 +55,7 @@ export class ModalUsuarioComponent implements OnInit {
    * Si es undefined, el modal está en modo creación
    */
   @Input() usuarioEditar?: UsuarioDto;
+  @Input() guardando = false;
 
   // ========================================
   // 📤 OUTPUTS: Eventos que emite al padre
@@ -131,40 +132,41 @@ export class ModalUsuarioComponent implements OnInit {
    * Valida y emite los datos al componente padre
    */
   guardarUsuario(): void {
-    console.log('💾 Intentando guardar usuario...');
-    
-    if (!this.validarUsuario()) {
-      alert('⚠️ Por favor complete todos los campos obligatorios:\n\n' +
-            '- Nombre de usuario\n' +
-            '- Contraseña\n' +
-            '- Nombre completo\n' +
-            '- Rol');
-      return;
-    }
-
-    // Preparar el payload
-    const payload: any = {
-      nombreUsuario: this.nombreUsuario.trim(),
-      clave: this.clave,
-      nombreCompleto: this.nombreCompleto.trim(),
-      email: this.email.trim() || undefined,
-      rol: this.rol,
-      estado: this.estado
-    };
-
-    // Si estamos en modo edición, incluir el ID
-    if (this.modoEdicion && this.usuarioEditar?.idUsuario) {
-      payload.idUsuario = this.usuarioEditar.idUsuario;
-    }
-
-    console.log('✅ Datos válidos, emitiendo al padre:', payload);
-    
-    // Emitir los datos al padre
-    this.guardar.emit(payload);
-    
-    // Limpiar el formulario
-    this.limpiarFormulario();
+  console.log('💾 Intentando guardar usuario...');
+  
+  if (!this.validarUsuario()) {
+    // ❌ QUITAR O COMENTAR ESTE ALERT - La validación se puede mejorar después
+    // alert('⚠️ Por favor complete todos los campos obligatorios:\n\n' +
+    //       '- Nombre de usuario\n' +
+    //       '- Contraseña\n' +
+    //       '- Nombre completo\n' +
+    //       '- Rol');
+    return;
   }
+
+  // Preparar el payload
+  const payload: any = {
+    nombreUsuario: this.nombreUsuario.trim(),
+    clave: this.clave,
+    nombreCompleto: this.nombreCompleto.trim(),
+    email: this.email.trim() || undefined,
+    rol: this.rol,
+    estado: this.estado
+  };
+
+  // Si estamos en modo edición, incluir el ID
+  if (this.modoEdicion && this.usuarioEditar?.idUsuario) {
+    payload.idUsuario = this.usuarioEditar.idUsuario;
+  }
+
+  console.log('✅ Datos válidos, emitiendo al padre:', payload);
+  
+  // Emitir los datos al padre
+  this.guardar.emit(payload);
+  
+  // Limpiar el formulario
+  this.limpiarFormulario();
+}
 
   /**
    * Obtiene el título del modal según el modo
