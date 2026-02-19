@@ -111,7 +111,7 @@ export class AuthService {
       return throwError(() => new Error('Todos los campos son obligatorios'));
     }
     
-    return this.http.post<AuthResponse>(`${this.API_URL}/register`, userData)
+    return this.http.post<AuthResponse>(`https://backend-production-4f6d.up.railway.app/api/auth/register`, userData)
       .pipe(
         tap(response => {
           console.log('✅ Registro exitoso, respuesta del backend:', response);
