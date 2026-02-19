@@ -67,41 +67,32 @@ export class FacturaService {
 
   constructor(private http: HttpClient) { }
 
-  // Crear factura
   crear(factura: FacturaRequestDTO): Observable<FacturaResponseDTO> {
-    return this.http.post<FacturaResponseDTO>(`${environment.apiUrl}/facturas`, factura);
+    return this.http.post<FacturaResponseDTO>(this.apiUrl, factura);
   }
 
-  // Listar todas las facturas
   listar(): Observable<FacturaResponseDTO[]> {
-    return this.http.get<FacturaResponseDTO[]>(`${environment.apiUrl}/facturas`);
+    return this.http.get<FacturaResponseDTO[]>(this.apiUrl);
   }
 
-  // Obtener una factura por ID
   obtenerPorId(id: number): Observable<FacturaResponseDTO> {
-    return this.http.get<FacturaResponseDTO>(`${environment.apiUrl}/${id}`);
+    return this.http.get<FacturaResponseDTO>(`${this.apiUrl}/${id}`);
   }
 
-  // Listar facturas por cliente
   listarPorCliente(idCliente: number): Observable<FacturaResponseDTO[]> {
-    return this.http.get<FacturaResponseDTO[]>(`${environment.apiUrl}/cliente/${idCliente}`);
+    return this.http.get<FacturaResponseDTO[]>(`${this.apiUrl}/cliente/${idCliente}`);
   }
 
-  // Listar facturas por usuario
   listarPorUsuario(idUsuario: number): Observable<FacturaResponseDTO[]> {
-    return this.http.get<FacturaResponseDTO[]>(`${environment.apiUrl}/usuario/${idUsuario}`);
+    return this.http.get<FacturaResponseDTO[]>(`${this.apiUrl}/usuario/${idUsuario}`);
   }
-  
-  descargarPdf(id: number) {
-  return this.http.get(`${environment.apiUrl}/api/facturas/${id}/pdf`, {
-    responseType: 'blob'
-  });
-}
 
-descargarExcel(id: number) {
-  return this.http.get(`${environment.apiUrl}/api/facturas/${id}/excel`, {
-    responseType: 'blob'
-  });
-}
+  descargarPdf(id: number) {
+    return this.http.get(`${this.apiUrl}/${id}/pdf`, { responseType: 'blob' });
+  }
+
+  descargarExcel(id: number) {
+    return this.http.get(`${this.apiUrl}/${id}/excel`, { responseType: 'blob' });
+  }
 
 }
