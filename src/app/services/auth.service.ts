@@ -112,7 +112,7 @@ export class AuthService {
     }
     
     //https://backend-production-4f6d.up.railway.app/api/auth/register
-    return this.http.post<AuthResponse>(`https://backend-production-4f6d.up.railway.app/api/auth/register`, userData)
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, userData)
       .pipe(
         tap(response => {
           console.log('✅ Registro exitoso, respuesta del backend:', response);
