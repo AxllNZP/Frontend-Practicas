@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { ProductoService, ProductoDto } from '../../../services/producto.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-modal-reporte-productos',
@@ -31,7 +32,7 @@ export class ModalReporteProductosComponent implements OnInit {
   fechaInicio?: string;
   fechaFin?: string;
 
-  private readonly baseUrl = 'http://localhost:8080/api/reportes/productos';
+  private readonly baseUrl = `${environment.apiUrl}/api/reportes/productos`;
 
   constructor(
     private productoService: ProductoService,

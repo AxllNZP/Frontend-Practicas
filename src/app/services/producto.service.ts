@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 export type EstadoGeneral = 'activo' | 'inactivo';
 
@@ -26,7 +27,7 @@ export interface ProductoDto {
 })
 export class ProductoService {
 
-  private apiUrl = 'http://localhost:8080/api/productos';
+  private apiUrl = `${environment.apiUrl}/api/productos`;
 
   constructor(private http: HttpClient) {
     console.log('📦 ProductoService inicializado');

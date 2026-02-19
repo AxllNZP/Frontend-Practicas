@@ -8,6 +8,7 @@ import { ProductoModalComponent } from './modal-productos/modal-productos';
 import { MatDialog } from '@angular/material/dialog';
 import { FeedbackDialogComponent, FeedbackDialogData } from '../feedback-dialog/feedback-dialog.component';
 import { ModalReporteProductosComponent } from './modal-reporte-productos/modal-reporte-productos.component';
+import { environment } from '../../environments/environment';
 
 
 
@@ -239,7 +240,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   generarPdfReporte(data: {inicio: string, fin: string, idProducto?: string}) {
 
-  let url = `http://localhost:8080/api/reportes/productos/pdf?fechaInicio=${data.inicio}&fechaFin=${data.fin}`;
+  let url = `${environment.apiUrl}/api/reportes/productos/pdf?fechaInicio=${data.inicio}&fechaFin=${data.fin}`;
 
   if (data.idProducto) {
     url += `&idProducto=${data.idProducto}`;
@@ -251,7 +252,7 @@ export class ProductosComponent implements OnInit, OnDestroy {
 
   generarExcelReporte(data: {inicio: string, fin: string, idProducto?: string}) {
 
-  let url = `http://localhost:8080/api/reportes/productos/excel?fechaInicio=${data.inicio}&fechaFin=${data.fin}`;
+  let url = `${environment.apiUrl}/api/reportes/productos/excel?fechaInicio=${data.inicio}&fechaFin=${data.fin}`;
 
   if (data.idProducto) {
     url += `&idProducto=${data.idProducto}`;

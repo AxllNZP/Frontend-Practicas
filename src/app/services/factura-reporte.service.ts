@@ -15,7 +15,7 @@ export interface FacturaReporteDto {
 })
 export class FacturaReporteService {
 
-  private apiUrl = 'http://localhost:8080/api/facturas/cliente';
+  private apiUrl = '${environment.apiUrl}/api/facturas/cliente';
 
   constructor(private http: HttpClient) {}
 

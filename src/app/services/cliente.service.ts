@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 export interface ClienteDto {
   idCliente: number;
@@ -24,7 +25,7 @@ export interface ClienteDto {
   providedIn: 'root'
 })
 export class ClienteService {
-  private apiUrl = 'http://localhost:8080/api/clientes';
+  private apiUrl = `${environment.apiUrl}/api/clientes`;
 
   constructor(private http: HttpClient) {
     console.log('📋 ClienteService inicializado');

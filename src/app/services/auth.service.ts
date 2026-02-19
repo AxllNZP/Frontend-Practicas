@@ -7,6 +7,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, BehaviorSubject, tap, catchError, throwError } from 'rxjs';
 import { AuthRequest, AuthResponse, RegisterRequest, Usuario, RolUsuario } from '../models/auth.models';
+import { environment } from '../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -15,7 +16,7 @@ export class AuthService {
   
   private http = inject(HttpClient);
   
-  private readonly API_URL = 'http://localhost:8080/api/auth';
+  private readonly API_URL = `${environment.apiUrl}/api/auth`;
   
   private currentUserSubject = new BehaviorSubject<Usuario | null>(this.getUserFromToken());
   public currentUser$ = this.currentUserSubject.asObservable();
@@ -79,7 +80,7 @@ export class AuthService {
           
           if (error.status === 0) {
             errorMessage = 'No se pudo conectar con el servidor. Verifica:\n' +
-                          '1. Que el backend esté corriendo en http://localhost:8080\n' +
+                          '1. Que el backend esté corriendo en ${environment.apiUrl}\n' +
                           '2. Que CORS esté configurado correctamente\n' +
                           '3. Que no haya firewall bloqueando la conexión';
           } else if (error.status === 401) {

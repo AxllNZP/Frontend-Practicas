@@ -7,6 +7,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, retry, tap } from 'rxjs/operators';
+import { environment } from '../environments/environment';
 
 export interface MonedaDto {
   idMoneda: number;
@@ -20,7 +21,7 @@ export interface MonedaDto {
 })
 export class MonedaService {
 
-  private apiUrl = 'http://localhost:8080/api/moneda';
+  private apiUrl = `${environment.apiUrl}/api/moneda`;
 
   constructor(private http: HttpClient) {
     console.log('💱 MonedaService inicializado');

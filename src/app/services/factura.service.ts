@@ -2,6 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { environment } from '../environments/environment';
 
 // ===== INTERFACES (coinciden con tu backend) =====
 
@@ -63,43 +64,43 @@ export interface FacturaResponseDTO {
   providedIn: 'root'
 })
 export class FacturaService {
-  private apiUrl = 'http://localhost:8080/api/facturas';
+  private apiUrl = `${environment.apiUrl}/api/facturas`;
 
   constructor(private http: HttpClient) { }
 
   // Crear factura
   crear(factura: FacturaRequestDTO): Observable<FacturaResponseDTO> {
-    return this.http.post<FacturaResponseDTO>(this.apiUrl, factura);
+    return this.http.post<FacturaResponseDTO>(`${environment.apiUrl}/facturas`, factura);
   }
 
   // Listar todas las facturas
   listar(): Observable<FacturaResponseDTO[]> {
-    return this.http.get<FacturaResponseDTO[]>(this.apiUrl);
+    return this.http.get<FacturaResponseDTO[]>(`${environment.apiUrl}/facturas`);
   }
 
   // Obtener una factura por ID
   obtenerPorId(id: number): Observable<FacturaResponseDTO> {
-    return this.http.get<FacturaResponseDTO>(`${this.apiUrl}/${id}`);
+    return this.http.get<FacturaResponseDTO>(`${environment.apiUrl}/${id}`);
   }
 
   // Listar facturas por cliente
   listarPorCliente(idCliente: number): Observable<FacturaResponseDTO[]> {
-    return this.http.get<FacturaResponseDTO[]>(`${this.apiUrl}/cliente/${idCliente}`);
+    return this.http.get<FacturaResponseDTO[]>(`${environment.apiUrl}/cliente/${idCliente}`);
   }
 
   // Listar facturas por usuario
   listarPorUsuario(idUsuario: number): Observable<FacturaResponseDTO[]> {
-    return this.http.get<FacturaResponseDTO[]>(`${this.apiUrl}/usuario/${idUsuario}`);
+    return this.http.get<FacturaResponseDTO[]>(`${environment.apiUrl}/usuario/${idUsuario}`);
   }
   
   descargarPdf(id: number) {
-  return this.http.get(`http://localhost:8080/api/facturas/${id}/pdf`, {
+  return this.http.get(`${environment.apiUrl}/api/facturas/${id}/pdf`, {
     responseType: 'blob'
   });
 }
 
 descargarExcel(id: number) {
-  return this.http.get(`http://localhost:8080/api/facturas/${id}/excel`, {
+  return this.http.get(`${environment.apiUrl}/api/facturas/${id}/excel`, {
     responseType: 'blob'
   });
 }
