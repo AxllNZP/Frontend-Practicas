@@ -102,7 +102,7 @@ export class AuthService {
       rol: userData.rol,
       email: userData.email
     });
-    console.log('📤 URL destino:', `https://backend-production-4f6d.up.railway.app/api/auth/register`);
+    console.log('📤 URL destino:', `SAPO`);
     console.log('📦 Payload completo:', JSON.stringify(userData));
     
     // ✅ VALIDACIÓN ANTES DE ENVIAR
@@ -111,6 +111,7 @@ export class AuthService {
       return throwError(() => new Error('Todos los campos son obligatorios'));
     }
     
+    //https://backend-production-4f6d.up.railway.app/api/auth/register
     return this.http.post<AuthResponse>(`https://backend-production-4f6d.up.railway.app/api/auth/register`, userData)
       .pipe(
         tap(response => {
