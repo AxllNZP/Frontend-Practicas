@@ -96,16 +96,13 @@ export class AuthService {
       );
   }
 
-  /**
-   * ✅ REGISTRO CORREGIDO
-   */
   register(userData: RegisterRequest): Observable<AuthResponse> {
     console.log('📝 Registrando usuario:', {
       nombreUsuario: userData.nombreUsuario,
       rol: userData.rol,
       email: userData.email
     });
-    console.log('📤 URL destino:', `${this.API_URL}/register`);
+    console.log('📤 URL destino:', `https://backend-production-4f6d.up.railway.app/api/auth/register`);
     console.log('📦 Payload completo:', JSON.stringify(userData));
     
     // ✅ VALIDACIÓN ANTES DE ENVIAR
